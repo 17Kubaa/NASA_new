@@ -1,0 +1,132 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Map of the World</title>
+    <style>
+      body {
+        margin: 0;
+        display: flex;
+        height: 100vh;
+        font-family: Arial, sans-serif;
+      }
+      #sidebar {
+        width: 250px;
+        background: #f4f4f4;
+        padding: 10px;
+        overflow-y: auto;
+      }
+      #map {
+        flex: 1;
+      }
+      h3 { margin-top: 0;}
+      ul {padding-left: 20px; }
+       select {width: 100%; margin-bottom: 10px;} 
+    </style>
+  </head>
+  <body>
+    <div id="sidebar">
+      <h3>Map of the World</h3>
+      <select id="country">
+        <option value="Ireland">Ireland</option> <!--DEFAULT VALUE-->
+        <option value="Hungary">Hungary</option>
+        <option value="France">France</option>
+        <option value="Austria">Austria</option>
+      </select>
+      <select id="activity">
+        <option value="hiking">Hiking</option>
+        <option value="beaches">Beaches</option>
+      </select>
+     
+      <ul id="places-list"></ul>
+    </div>
+    <div id="map"></div>
+
+    <script>
+      let map;
+      let service;
+      let markers = [];
+
+
+
+
+      function initMap() {
+        map = new google.maps.Map(document.getElementById("map"),{  //WE DO NOT WANT IT CONSTANT
+       // const hungaryCenter = { lat: 47.1625, lng: 19.5033 }; // Center of Austria
+        //const center = { lat: 0, lng: 0 };
+        //const map = new google.maps.Map(document.getElementById("map"), {
+          zoom: 5,
+          center: { lat: 53.4129, lng: -8.2439 }, //ireland default
+          mapTypeControl: false,
+          streetViewControl: false,
+        });
+
+        service = new google.maps.places.PlacesService(map);
+
+        searchPlaces();
+
+
+        document.getElementById("country").addEventListener("change", searchPlaces);
+        document.getElementById("activity").addEventListener("change", searchPlaces);
+
+        function searchPlaces() {
+      const country = document.getElementById("country").value;
+      const activity = document.getElementById("activity").value;
+
+        markers.forEach(m => m.setMap(null));
+        markers = [];
+
+
+        const list = document.getElementById("places-list");
+        list.innerHTML = "";
+
+
+        const centers = {
+        "Austria": { lat: 47.5162, lng: 14.5501 },
+        "Hungary": { lat: 47.1625, lng: 19.5033 },
+        "France": { lat: 46.2276, lng: 2.2137 },
+        "Ireland": { lat: 53.4129, lng: -8.2439 }
+        }
+
+        map.setCenter(centers[country]);
+        map.setZoom(6);
+
+
+        const request = {
+         // location: austriaCenter,
+         // radius: 5000,
+        //  type: ['park'],
+          query: `${activity} in ${country}`, //get the query to ONLY select of that country
+        fields: ["name", "geometry", "formatted_address"]
+        };
+
+        service.textSearch(request, (results, status) => {
+          if (status === google.maps.places.PlacesServiceStatus.OK) {
+            results.forEach(place => {
+              if (place.formatted_address && place.formatted_address.includes(country)) {
+              const marker = new google.maps.Marker({
+                position: place.geometry.location,
+                map,
+                title: place.name
+              });
+              markers.push(marker);
+
+              const li = document.createElement("li");
+              li.textContent = place.name;
+              list.appendChild(li);
+              }
+            });
+          } else {
+            console.error("Places API error:", status);
+          }
+          });
+        }}
+    </script>
+
+    <script
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDkk5aRWm5Yr_X9GhJIjljLgVL9jXlZ_0k&callback=initMap&libraries=places"
+      async
+      defer
+    ></script>
+  </body>
+</html>
