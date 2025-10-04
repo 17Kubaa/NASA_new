@@ -29,9 +29,8 @@
       margin-top: 20px; padding: 10px 14px; border-radius: 8px;
       background: linear-gradient(90deg,#46b3ff,#2bd0a6); color: #022; font-weight: bold; border: none; cursor: pointer; width: 100%;
     }
-    /* --- MODIFIED: Styling for the unified results list --- */
     #results-list {
-      list-style: none; padding: 0; margin: 0; width: 90%; height: 70vh; /* Taller list */
+      list-style: none; padding: 0; margin: 0; width: 90%; height: 70vh;
       overflow-y: auto;
     }
     .result-item {
@@ -39,9 +38,11 @@
       background: rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center;
     }
     .result-item:hover { background: rgba(70,179,255,0.2); }
-    .place-name { font-weight: bold; flex-grow: 1; }
-    .weather-info { text-align: right; white-space: nowrap; }
-    .weather-info span { display: block; font-size: 0.85em; color: #9aa6b2; }
+    .place-info { flex-grow: 1; }
+    .place-name { font-weight: bold; }
+    .place-distance { font-size: 0.8em; color: #9aa6b2; }
+    .weather-info { text-align: right; white-space: nowrap; margin-left: 10px; }
+    .weather-info span { display: block; font-size: 0.8em; color: #9aa6b2; }
     .date-range { display: flex; gap: 8px; width: 100%; }
   </style>
 </head>
@@ -80,7 +81,6 @@
   <div class="panel" id="right-panel">
     <div style="width:80%;max-width:400px;display:flex;flex-direction:column;align-items:center;">
       <h2>Results</h2>
-      <!-- --- MODIFIED: One single list for combined results --- -->
       <ul id="results-list"></ul>
     </div>
   </div>
@@ -91,8 +91,7 @@
 
     function initMap() {
         map = new google.maps.Map(document.getElementById("map"), {
-            zoom: 2, center: { lat: 20, lng: 0 },
-            mapTypeControl: false, streetViewControl: false,
+            zoom: 2, center: { lat: 20, lng: 0 }, mapTypeControl: false, streetViewControl: false,
         });
         service = new google.maps.places.PlacesService(map);
 
@@ -100,10 +99,7 @@
         const autocomplete = new google.maps.places.Autocomplete(citySearchInput, { types: ['(cities)'] });
         autocomplete.addListener('place_changed', () => {
             const place = autocomplete.getPlace();
-            if (!place.geometry || !place.geometry.location) {
-                alert("No details available for input: '" + place.name + "'");
-                return;
-            }
+            if (!place.geometry || !place.geometry.location) { return; }
             map.setCenter(place.geometry.location);
             map.setZoom(10);
             state.searchCenter = place.geometry.location;
@@ -124,7 +120,7 @@
         markers = [];
         resultsList.innerHTML = "<li>Searching for places...</li>";
 
-        const request = { location: state.searchCenter, radius: 50000, query: activity, fields: ["name", "geometry", "formatted_address"] };
+        const request = { location: state.searchCenter, radius: 50000, query: activity, fields: ["name", "geometry"] };
 
         service.textSearch(request, async (places, status) => {
             if (status !== google.maps.places.PlacesServiceStatus.OK || !places || places.length === 0) {
@@ -135,35 +131,58 @@
             resultsList.innerHTML = `<li>Found ${places.length} places. Fetching weather data...</li>`;
 
             try {
-                // Create an array of promises, one for each weather data fetch
+                // Step 1: Augment places with distance information
+                places.forEach(place => {
+                    place.distance = google.maps.geometry.spherical.computeDistanceBetween(state.searchCenter, place.geometry.location);
+                });
+
+                // Step 2: Fetch weather for all places concurrently
                 const weatherPromises = places.map(place => {
                     const loc = place.geometry.location;
-                    const lat = typeof loc.lat === 'function' ? loc.lat() : loc.lat;
-                    const lng = typeof loc.lng === 'function' ? loc.lng() : loc.lng;
-                    
-                    const parameters = "t_2m:C,precip_1h:mm"; // Only fetch temp and precip
-                    const startISO = new Date(fromDate).toISOString().split('T')[0] + "T00:00:00Z";
-                    const endISO = new Date(toDate).toISOString().split('T')[0] + "T23:59:00Z";
-                    const url = `/api/getWeather?lat=${lat}&lng=${lng}&startISO=${startISO}&endISO=${endISO}&parameters=${parameters}`;
-                    
+                    const url = `/api/getWeather?lat=${loc.lat()}&lng=${loc.lng()}&startISO=${new Date(fromDate).toISOString().slice(0,10)}T00:00:00Z&endISO=${new Date(toDate).toISOString().slice(0,10)}T23:59:00Z&parameters=t_2m:C,precip_1h:mm`;
                     return fetch(url).then(res => res.json());
                 });
 
-                // Wait for ALL weather requests to complete
                 const weatherResults = await Promise.all(weatherPromises);
 
-                resultsList.innerHTML = ""; // Clear list for final results
+                // Step 3: Combine places, weather, and averages into a single array
+                const combinedResults = places.map((place, index) => ({
+                    place: place,
+                    weather: calculateWeatherAverages(weatherResults[index])
+                }));
 
-                // Now, combine the places and weather data to build the final list
-                places.forEach((place, index) => {
-                    const weatherData = weatherResults[index];
-                    const averages = calculateWeatherAverages(weatherData);
-                    createUnifiedListItemAndMarker(place, averages);
-                });
+                // Step 4: Sort the combined array based on the selected activity
+                const sortedResults = sortResults(combinedResults, activity);
+
+                // Step 5: Render the final sorted list
+                resultsList.innerHTML = "";
+                sortedResults.forEach(result => createUnifiedListItemAndMarker(result));
 
             } catch (error) {
-                resultsList.innerHTML = `<li>Error fetching weather data: ${error.message}</li>`;
-                console.error("Error during weather fetch:", error);
+                resultsList.innerHTML = `<li>Error processing data: ${error.message}</li>`;
+            }
+        });
+    }
+
+    function sortResults(results, activity) {
+        return results.sort((a, b) => {
+            // Handle cases where weather data is not available
+            if (a.weather.avgTemp === 'N/A') return 1;
+            if (b.weather.avgTemp === 'N/A') return -1;
+
+            switch (activity) {
+                case 'hiking trails':
+                    return a.weather.avgPrecip - b.weather.avgPrecip; // Lowest precipitation
+                case 'beaches':
+                    return b.weather.avgTemp - a.weather.avgTemp; // Highest temperature
+                case 'ski resorts':
+                    return a.weather.avgTemp - b.weather.avgTemp; // Lowest temperature
+                case 'fishing spots':
+                case 'museums':
+                case 'castles':
+                case 'national parks':
+                default:
+                    return a.place.distance - b.place.distance; // Closest distance
             }
         });
     }
@@ -172,60 +191,54 @@
         if (!weatherData || !weatherData.data || weatherData.status !== "OK") {
             return { avgTemp: 'N/A', avgPrecip: 'N/A' };
         }
-        
         let tempSum = 0, precipSum = 0, tempCount = 0, precipCount = 0;
-        
-        // Find temperature parameter
         const tempParam = weatherData.data.find(p => p.parameter === 't_2m:C');
         if (tempParam) {
-            const values = tempParam.coordinates[0].dates;
-            values.forEach(v => { tempSum += v.value; tempCount++; });
+            tempParam.coordinates[0].dates.forEach(v => { tempSum += v.value; tempCount++; });
         }
-
-        // Find precipitation parameter
         const precipParam = weatherData.data.find(p => p.parameter === 'precip_1h:mm');
         if (precipParam) {
-            const values = precipParam.coordinates[0].dates;
-            values.forEach(v => { precipSum += v.value; precipCount++; });
+            precipParam.coordinates[0].dates.forEach(v => { precipSum += v.value; precipCount++; });
         }
-
         return {
             avgTemp: tempCount > 0 ? (tempSum / tempCount).toFixed(1) : 'N/A',
             avgPrecip: precipCount > 0 ? (precipSum / precipCount).toFixed(2) : 'N/A'
         };
     }
 
-    function createUnifiedListItemAndMarker(place, weatherAverages) {
-        // Create Map Marker
-        const marker = new google.maps.Marker({
-            position: place.geometry.location, map, title: place.name
-        });
+    function createUnifiedListItemAndMarker(result) {
+        const place = result.place;
+        const weather = result.weather;
+
+        const marker = new google.maps.Marker({ position: place.geometry.location, map, title: place.name });
         markers.push(marker);
 
-        // Create Unified List Item
         const li = document.createElement("li");
         li.className = 'result-item';
+        const distanceInKm = (place.distance / 1000).toFixed(1);
         li.innerHTML = `
-            <div class="place-name">${place.name}</div>
+            <div class="place-info">
+                <div class="place-name">${place.name}</div>
+                <div class="place-distance">${distanceInKm} km away</div>
+            </div>
             <div class="weather-info">
-                ${weatherAverages.avgTemp}°C
+                ${weather.avgTemp}°C
                 <span>Avg. Temp</span>
             </div>
-            <div class="weather-info" style="margin-left: 15px;">
-                ${weatherAverages.avgPrecip} mm
+            <div class="weather-info">
+                ${weather.avgPrecip} mm
                 <span>Avg. Precip</span>
             </div>
         `;
         document.getElementById("results-list").appendChild(li);
 
-        // Add interaction to pan to marker on click
-        li.addEventListener('click', () => {
-            map.panTo(place.geometry.location);
-            map.setZoom(12);
-        });
+        const clickHandler = () => { map.panTo(place.geometry.location); map.setZoom(14); };
+        li.addEventListener('click', clickHandler);
+        marker.addListener('click', clickHandler);
     }
 </script>
 
-<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDkk5aRWm5Yr_X9GhJIjljLgVL9jXlZ_0k&libraries=places&callback=initMap"></script>
+<!-- IMPORTANT: Added the 'geometry' library for distance calculations -->
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDkk5aRWm5Yr_X9GhJIjljLgVL9jXlZ_0k&libraries=places,geometry&callback=initMap"></script>
 </body>
 </html>
