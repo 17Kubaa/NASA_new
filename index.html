@@ -14,30 +14,6 @@
       flex: 1; height: 100%; display: flex; flex-direction: column;
       justify-content: center; align-items: center; box-sizing: border-box; padding: 30px;
     }
-    .weather-day {
-  flex: 0 0 100px;
-  background: rgba(255,255,255,0.05);
-  border-radius: 12px;
-  padding: 10px;
-  text-align: center;
-  font-size: 14px;
-}
-.weather-day .date {
-  font-weight: bold;
-  margin-bottom: 6px;
-}
-.weather-day .icon {
-  font-size: 28px;
-  margin-bottom: 6px;
-}
-.weather-day .temp {
-  font-weight: bold;
-}
-.weather-day .extra {
-  font-size: 12px;
-  color: #9aa6b2;
-  margin-top: 4px;
-}
     #left-panel { background-color: #0b1220; border-right: 1px solid rgba(255,255,255,0.05); }
     #center-panel { background: radial-gradient(circle at center, #152338, #0f1724); }
     #right-panel { background-color: #0b1220; border-left: 1px solid rgba(255,255,255,0.05); }
@@ -252,42 +228,7 @@
         marker.addListener("click", () => getWeatherData(location));
         li.addEventListener("click", () => getWeatherData(location));
     }
-    function renderAppleWeather(data) {
-  const output = document.getElementById('weatherOutput');
-  output.innerHTML = "";
 
-  // Group data by date
-  const days = {};
-  data.data.forEach(param => {
-    param.coordinates[0].dates.forEach(d => {
-      const day = d.date.split("T")[0];
-      if (!days[day]) days[day] = {};
-      days[day][param.parameter] = d.value;
-    });
-  });
-
-  // Build day cards
-  Object.entries(days).forEach(([date, values]) => {
-    const div = document.createElement('div');
-    div.className = "weather-day";
-
-    // Date
-    const options = { weekday: 'short', day: 'numeric', month: 'short' };
-    div.innerHTML = `<div class="date">${new Date(date).toLocaleDateString(undefined, options)}</div>`;
-
-    // Weather icon logic
-    let icon = "☀️";
-    if (values["precip_1h:mm"] > 1) icon = "🌧️";
-    else if (values["wind_speed_10m:ms"] > 6) icon = "💨";
-    else if (values["t_2m:C"] < 10) icon = "❄️";
-
-    div.innerHTML += `<div class="icon">${icon}</div>`;
-    div.innerHTML += `<div class="temp">${Math.round(values["t_2m:C"])}°C</div>`;
-    div.innerHTML += `<div class="extra">💧${values["precip_1h:mm"] || 0}mm 🌬️${values["wind_speed_10m:ms"] || 0}m/s</div>`;
-
-    output.appendChild(div);
-  });
-}
     async function getWeatherData(location) {
         // Robustly get lat/lng from the location object
         const lat = typeof location.lat === 'function' ? location.lat() : location.lat;
