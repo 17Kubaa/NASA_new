@@ -225,6 +225,24 @@ async function getWeatherData() {
     if (!res.ok) throw new Error(`HTTP ${res.status} - ${data.error}`);
     outputElement.textContent = JSON.stringify(data, null, 2);
   } catch(err) { outputElement.textContent = "Error fetching weather: "+err.message; }
+
+    // Build HTML table
+  const allKeys = new Set();
+  Object.values(results).forEach(day => Object.keys(day).forEach(k => allKeys.add(k)));
+  const keysArray = Array.from(allKeys);
+
+  let html = "<table><tr><th>Date</th>";
+  keysArray.forEach(k => html += `<th>${k}</th>`);
+  html += "</tr>";
+
+  Object.entries(results).forEach(([date, day]) => {
+    html += `<tr><td>${date}</td>`;
+    keysArray.forEach(k => html += `<td>${day[k] !== undefined ? day[k] : "-"}</td>`);
+    html += "</tr>";
+  });
+  html += "</table>";
+
+  outputElement.innerHTML = html;
 }
 
 function exportJSON() {
