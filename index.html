@@ -8,7 +8,7 @@
     body {
       margin: 0; font-family: "Inter", Arial, sans-serif; height: 100vh;
       display: flex; flex-direction: row; justify-content: space-between; align-items: center;
-      background-color: #0f1724; color: #EDF6EF; overflow: hidden;
+      background-color: #0f1724; color: #e6eef6; overflow: hidden;
     }
     .panel {
       flex: 1; height: 100%; display: flex; flex-direction: column;
@@ -19,29 +19,29 @@
     #right-panel { background-color: #0b1220; border-left: 1px solid rgba(255,255,255,0.05); }
     #map { width: 130%; height: 80%; border-radius: 20px; overflow: hidden; box-shadow: 0 0 25px rgba(0,0,0,0.3); }
     h2 { color: #46b3ff; margin-bottom: 20px; }
-    h3 { color: #2bd0a6; margin-top: 20px; margin-bottom: 10px; }
     label { display: block; margin-top: 10px; color: #9aa6b2; font-size: 14px; }
-    input[type="date"], select {
+    input[type="date"], input[type="text"], select {
       width: 100%; padding: 8px; margin-top: 5px; border-radius: 6px; border: none;
-      background: rgba(255,255,255,0.1); color: #EDF6EF;
+      background: rgba(255,255,255,0.1); color: #e6eef6;
     }
     select option { background: #0b1220; }
     button {
       margin-top: 20px; padding: 10px 14px; border-radius: 8px;
       background: linear-gradient(90deg,#46b3ff,#2bd0a6); color: #022; font-weight: bold; border: none; cursor: pointer; width: 100%;
     }
-    pre {
-      background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px;
-      overflow-y: auto; font-size: 12px; color: #b8cbe3; max-height: 40vh; width: 90%;
+    /* --- MODIFIED: Styling for the unified results list --- */
+    #results-list {
+      list-style: none; padding: 0; margin: 0; width: 90%; height: 70vh; /* Taller list */
+      overflow-y: auto;
     }
-    #places-list {
-      list-style: none; padding: 0; margin: 0; width: 90%; max-height: 40vh; overflow-y: auto;
+    .result-item {
+      padding: 12px; border-radius: 8px; margin-bottom: 8px; cursor: pointer;
+      background: rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center;
     }
-    #places-list li {
-      padding: 8px; border-radius: 6px; cursor: pointer; margin-bottom: 5px;
-      background: rgba(255,255,255,0.05);
-    }
-    #places-list li:hover { background: rgba(70,179,255,0.2); }
+    .result-item:hover { background: rgba(70,179,255,0.2); }
+    .place-name { font-weight: bold; flex-grow: 1; }
+    .weather-info { text-align: right; white-space: nowrap; }
+    .weather-info span { display: block; font-size: 0.85em; color: #9aa6b2; }
     .date-range { display: flex; gap: 8px; width: 100%; }
   </style>
 </head>
@@ -50,54 +50,8 @@
   <div class="panel" id="left-panel">
     <div style="width:80%; max-width:300px;">
       <h2>Discover & Plan</h2>
-
-      <label for="country">Select Country</label>
-      <select id="country">
-        <option value="Ireland">Ireland</option>
-        <option value="Argentina">Argentina</option>
-        <option value="Australia">Australia</option>
-        <option value="Austria">Austria</option>
-        <option value="Brazil">Brazil</option>
-        <option value="Canada">Canada</option>
-        <option value="Chile">Chile</option>
-        <option value="China">China</option>
-        <option value="Colombia">Colombia</option>
-        <option value="Egypt">Egypt</option>
-        <option value="Ethiopia">Ethiopia</option>
-        <option value="France">France</option>
-        <option value="Germany">Germany</option>
-        <option value="Greece">Greece</option>
-        <option value="Hungary">Hungary</option>
-        <option value="India">India</option>
-        <option value="Indonesia">Indonesia</option>
-        <option value="Iran">Iran</option>
-        <option value="Italy">Italy</option>
-        <option value="Japan">Japan</option>
-        <option value="Mexico">Mexico</option>
-        <option value="Netherlands">Netherlands</option>
-        <option value="New Zealand">New Zealand</option>
-        <option value="Nigeria">Nigeria</option>
-        <option value="Norway">Norway</option>
-        <option value="Pakistan">Pakistan</option>
-        <option value="Peru">Peru</option>
-        <option value="Philippines">Philippines</option>
-        <option value="Poland">Poland</option>
-        <option value="Portugal">Portugal</option>
-        <option value="Russia">Russia</option>
-        <option value="Saudi Arabia">Saudi Arabia</option>
-        <option value="South Africa">South Africa</option>
-        <option value="South Korea">South Korea</option>
-        <option value="Spain">Spain</option>
-        <option value="Sweden">Sweden</option>
-        <option value="Switzerland">Switzerland</option>
-        <option value="Thailand">Thailand</option>
-        <option value="Turkey">Turkey</option>
-        <option value="Ukraine">Ukraine</option>
-        <option value="United Kingdom">United Kingdom</option>
-        <option value="United States">United States</option>
-        <option value="Vietnam">Vietnam</option>
-      </select>
-
+      <label for="citySearch">Search for a City</label>
+      <input id="citySearch" type="text" placeholder="e.g., Paris, France" />
       <label for="activity">Select Activity</label>
       <select id="activity">
         <option value="hiking trails">Hiking</option>
@@ -108,14 +62,12 @@
         <option value="castles">Castles</option>
         <option value="national parks">National Parks</option>
       </select>
-      
-      <label>Date Range</label>
+      <label>Date Range for Weather</label>
       <div class="date-range">
         <input id="fromDate" type="date" />
         <input id="toDate" type="date" />
       </div>
-
-      <button id="findPlaces">Find Places</button>
+      <button id="findPlaces">Find Places & Weather</button>
     </div>
   </div>
 
@@ -127,141 +79,153 @@
   <!-- RIGHT: Results -->
   <div class="panel" id="right-panel">
     <div style="width:80%;max-width:400px;display:flex;flex-direction:column;align-items:center;">
-      <h2>Recommended Places</h2>
-      <ul id="places-list"></ul>
-      
-      <h3>Weather Details</h3>
-      <pre id="weatherOutput">Select a place to see the weather.</pre>
+      <h2>Results</h2>
+      <!-- --- MODIFIED: One single list for combined results --- -->
+      <ul id="results-list"></ul>
     </div>
   </div>
 
 <script>
     let map, service, markers = [];
-
-    const centers = {
-        "Argentina": { lat: -38.4161, lng: -63.6167 }, "Australia": { lat: -25.2744, lng: 133.7751 },
-        "Austria": { lat: 47.5162, lng: 14.5501 }, "Brazil": { lat: -14.2350, lng: -51.9253 },
-        "Canada": { lat: 56.1304, lng: -106.3468 }, "Chile": { lat: -35.6751, lng: -71.5430 },
-        "China": { lat: 35.8617, lng: 104.1954 }, "Colombia": { lat: 4.5709, lng: -74.2973 },
-        "Egypt": { lat: 26.8206, lng: 30.8025 }, "Ethiopia": { lat: 9.1450, lng: 40.4897 },
-        "France": { lat: 46.2276, lng: 2.2137 }, "Germany": { lat: 51.1657, lng: 10.4515 },
-        "Greece": { lat: 39.0742, lng: 21.8243 }, "Hungary": { lat: 47.1625, lng: 19.5033 },
-        "India": { lat: 20.5937, lng: 78.9629 }, "Indonesia": { lat: -0.7893, lng: 113.9213 },
-        "Iran": { lat: 32.4279, lng: 53.6880 }, "Ireland": { lat: 53.4129, lng: -8.2439 },
-        "Italy": { lat: 41.8719, lng: 12.5674 }, "Japan": { lat: 36.2048, lng: 138.2529 },
-        "Mexico": { lat: 23.6345, lng: -102.5528 }, "Netherlands": { lat: 52.1326, lng: 5.2913 },
-        "New Zealand": { lat: -40.9006, lng: 174.8860 }, "Nigeria": { lat: 9.0820, lng: 8.6753 },
-        "Norway": { lat: 60.4720, lng: 8.4689 }, "Pakistan": { lat: 30.3753, lng: 69.3451 },
-        "Peru": { lat: -9.1900, lng: -75.0152 }, "Philippines": { lat: 12.8797, lng: 121.7740 },
-        "Poland": { lat: 51.9194, lng: 19.1451 }, "Portugal": { lat: 39.3999, lng: -8.2245 },
-        "Russia": { lat: 61.5240, lng: 105.3188 }, "Saudi Arabia": { lat: 23.8859, lng: 45.0792 },
-        "South Africa": { lat: -30.5595, lng: 22.9375 }, "South Korea": { lat: 35.9078, lng: 127.7669 },
-        "Spain": { lat: 40.4637, lng: -3.7492 }, "Sweden": { lat: 62.0000, lng: 15.0000 },
-        "Switzerland": { lat: 46.8182, lng: 8.2275 }, "Thailand": { lat: 15.8700, lng: 100.9925 },
-        "Turkey": { lat: 38.9637, lng: 35.2433 }, "Ukraine": { lat: 48.3794, lng: 31.1656 },
-        "United Kingdom": { lat: 55.3781, lng: -3.4360 }, "United States": { lat: 39.8283, lng: -98.5795 },
-        "Vietnam": { lat: 14.0583, lng: 108.2772 }
-    };
+    let state = { searchCenter: null };
 
     function initMap() {
         map = new google.maps.Map(document.getElementById("map"), {
-            zoom: 6,
-            center: centers["Ireland"], // Default to Ireland
-            mapTypeControl: false,
-            streetViewControl: false,
+            zoom: 2, center: { lat: 20, lng: 0 },
+            mapTypeControl: false, streetViewControl: false,
         });
-
         service = new google.maps.places.PlacesService(map);
-        document.getElementById("findPlaces").addEventListener("click", findRecommendedPlaces);
+
+        const citySearchInput = document.getElementById('citySearch');
+        const autocomplete = new google.maps.places.Autocomplete(citySearchInput, { types: ['(cities)'] });
+        autocomplete.addListener('place_changed', () => {
+            const place = autocomplete.getPlace();
+            if (!place.geometry || !place.geometry.location) {
+                alert("No details available for input: '" + place.name + "'");
+                return;
+            }
+            map.setCenter(place.geometry.location);
+            map.setZoom(10);
+            state.searchCenter = place.geometry.location;
+        });
+        document.getElementById("findPlaces").addEventListener("click", findPlacesAndWeather);
     }
 
-    function findRecommendedPlaces() {
-        const country = document.getElementById("country").value;
-        const activity = document.getElementById("activity").value;
-        const placesList = document.getElementById("places-list");
+    async function findPlacesAndWeather() {
+        if (!state.searchCenter) { alert("Please search for and select a city first."); return; }
+        const fromDate = document.getElementById('fromDate').value;
+        const toDate = document.getElementById('toDate').value;
+        if (!fromDate || !toDate) { alert("Please select a start and end date."); return; }
 
-        // Clear previous results
+        const activity = document.getElementById("activity").value;
+        const resultsList = document.getElementById("results-list");
+        
         markers.forEach(m => m.setMap(null));
         markers = [];
-        placesList.innerHTML = "<li>Searching...</li>";
-        document.getElementById('weatherOutput').textContent = "Select a place to see the weather.";
+        resultsList.innerHTML = "<li>Searching for places...</li>";
 
-        // Center map on new country
-        map.setCenter(centers[country]);
-        map.setZoom(6);
+        const request = { location: state.searchCenter, radius: 50000, query: activity, fields: ["name", "geometry", "formatted_address"] };
 
-        const request = {
-            query: `${activity} in ${country}`,
-            fields: ["name", "geometry", "formatted_address"],
-        };
+        service.textSearch(request, async (places, status) => {
+            if (status !== google.maps.places.PlacesServiceStatus.OK || !places || places.length === 0) {
+                resultsList.innerHTML = "<li>No results found.</li>";
+                return;
+            }
 
-        service.textSearch(request, (results, status) => {
-            placesList.innerHTML = ""; // Clear "Searching..." message
-            if (status === google.maps.places.PlacesServiceStatus.OK && results) {
-                results.forEach(place => {
-                    // Filter results to ensure they are within the selected country
-                    if (place.formatted_address && place.formatted_address.includes(country)) {
-                        createMarkerAndListItem(place);
-                    }
+            resultsList.innerHTML = `<li>Found ${places.length} places. Fetching weather data...</li>`;
+
+            try {
+                // Create an array of promises, one for each weather data fetch
+                const weatherPromises = places.map(place => {
+                    const loc = place.geometry.location;
+                    const lat = typeof loc.lat === 'function' ? loc.lat() : loc.lat;
+                    const lng = typeof loc.lng === 'function' ? loc.lng() : loc.lng;
+                    
+                    const parameters = "t_2m:C,precip_1h:mm"; // Only fetch temp and precip
+                    const startISO = new Date(fromDate).toISOString().split('T')[0] + "T00:00:00Z";
+                    const endISO = new Date(toDate).toISOString().split('T')[0] + "T23:59:00Z";
+                    const url = `/api/getWeather?lat=${lat}&lng=${lng}&startISO=${startISO}&endISO=${endISO}&parameters=${parameters}`;
+                    
+                    return fetch(url).then(res => res.json());
                 });
-            } else {
-                placesList.innerHTML = "<li>No results found.</li>";
-                console.error("Places API error:", status);
+
+                // Wait for ALL weather requests to complete
+                const weatherResults = await Promise.all(weatherPromises);
+
+                resultsList.innerHTML = ""; // Clear list for final results
+
+                // Now, combine the places and weather data to build the final list
+                places.forEach((place, index) => {
+                    const weatherData = weatherResults[index];
+                    const averages = calculateWeatherAverages(weatherData);
+                    createUnifiedListItemAndMarker(place, averages);
+                });
+
+            } catch (error) {
+                resultsList.innerHTML = `<li>Error fetching weather data: ${error.message}</li>`;
+                console.error("Error during weather fetch:", error);
             }
         });
     }
 
-    function createMarkerAndListItem(place) {
+    function calculateWeatherAverages(weatherData) {
+        if (!weatherData || !weatherData.data || weatherData.status !== "OK") {
+            return { avgTemp: 'N/A', avgPrecip: 'N/A' };
+        }
+        
+        let tempSum = 0, precipSum = 0, tempCount = 0, precipCount = 0;
+        
+        // Find temperature parameter
+        const tempParam = weatherData.data.find(p => p.parameter === 't_2m:C');
+        if (tempParam) {
+            const values = tempParam.coordinates[0].dates;
+            values.forEach(v => { tempSum += v.value; tempCount++; });
+        }
+
+        // Find precipitation parameter
+        const precipParam = weatherData.data.find(p => p.parameter === 'precip_1h:mm');
+        if (precipParam) {
+            const values = precipParam.coordinates[0].dates;
+            values.forEach(v => { precipSum += v.value; precipCount++; });
+        }
+
+        return {
+            avgTemp: tempCount > 0 ? (tempSum / tempCount).toFixed(1) : 'N/A',
+            avgPrecip: precipCount > 0 ? (precipSum / precipCount).toFixed(2) : 'N/A'
+        };
+    }
+
+    function createUnifiedListItemAndMarker(place, weatherAverages) {
+        // Create Map Marker
         const marker = new google.maps.Marker({
-            position: place.geometry.location,
-            map,
-            title: place.name
+            position: place.geometry.location, map, title: place.name
         });
         markers.push(marker);
 
+        // Create Unified List Item
         const li = document.createElement("li");
-        li.textContent = place.name;
-        document.getElementById("places-list").appendChild(li);
+        li.className = 'result-item';
+        li.innerHTML = `
+            <div class="place-name">${place.name}</div>
+            <div class="weather-info">
+                ${weatherAverages.avgTemp}°C
+                <span>Avg. Temp</span>
+            </div>
+            <div class="weather-info" style="margin-left: 15px;">
+                ${weatherAverages.avgPrecip} mm
+                <span>Avg. Precip</span>
+            </div>
+        `;
+        document.getElementById("results-list").appendChild(li);
 
-        // When a marker or list item is clicked, get the weather for that place
-        const location = place.geometry.location;
-        marker.addListener("click", () => getWeatherData(location));
-        li.addEventListener("click", () => getWeatherData(location));
-    }
-
-    async function getWeatherData(location) {
-        // Robustly get lat/lng from the location object
-        const lat = typeof location.lat === 'function' ? location.lat() : location.lat;
-        const lng = typeof location.lng === 'function' ? location.lng() : location.lng;
-        
-        const fromDate = document.getElementById('fromDate').value;
-        const toDate = document.getElementById('toDate').value;
-        if (!fromDate || !toDate) {
-            alert("Please select a start and end date before checking the weather.");
-            return;
-        }
-
-        const parameters = "t_2m:C,precip_1h:mm,wind_speed_10m:ms,relative_humidity_2m:p";
-        const startISO = new Date(fromDate).toISOString().split('T')[0] + "T00:00:00Z";
-        const endISO = new Date(toDate).toISOString().split('T')[0] + "T23:59:00Z";
-        
-        const url = `/api/getWeather?lat=${lat}&lng=${lng}&startISO=${startISO}&endISO=${endISO}&parameters=${parameters}`;
-        
-        const outputElement = document.getElementById('weatherOutput');
-        outputElement.textContent = `Fetching weather for ${location.name || 'selected place'}...`;
-
-        try {
-            const res = await fetch(url);
-            const data = await res.json();
-            if (!res.ok) {
-                throw new Error(`HTTP ${res.status} - ${data.error || 'Unknown error'}`);
-            }
-            outputElement.textContent = JSON.stringify(data, null, 2);
-        } catch (err) {
-            outputElement.textContent = "Error fetching weather: " + err.message;
-        }
+        // Add interaction to pan to marker on click
+        li.addEventListener('click', () => {
+            map.panTo(place.geometry.location);
+            map.setZoom(12);
+        });
     }
 </script>
+
 <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDkk5aRWm5Yr_X9GhJIjljLgVL9jXlZ_0k&libraries=places&callback=initMap"></script>
 </body>
 </html>
