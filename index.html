@@ -13,7 +13,7 @@
       flex-direction: row;
       justify-content: space-between;
       align-items: center;
-      background-color: #0f1724; /* entire background same color */
+      background-color: #0f1724;
       color: #e6eef6;
       overflow: hidden;
     }
@@ -28,52 +28,149 @@
       align-items: center;
       box-sizing: border-box;
       padding: 30px;
-      background-color: #0f1724; /* unified background */
+    }
+
+    #left-panel {
+      background-color: #0b1220;
+      border-right: 1px solid rgba(255,255,255,0.05);
     }
 
     #center-panel {
+      background: radial-gradient(circle at center, #152338, #0f1724);
       display: flex;
       justify-content: center;
       align-items: center;
     }
 
+    #right-panel {
+      background-color: #0b1220;
+      border-left: 1px solid rgba(255,255,255,0.05);
+    }
+
+    /* Map */
     #map {
-      width: 130%; /* bigger map */
-      height: 80%; /* bigger map */
+      width: 80%;
+      height: 60%;
       border-radius: 20px;
       overflow: hidden;
       box-shadow: 0 0 25px rgba(0,0,0,0.3);
     }
 
-    h2 { color: #46b3ff; margin-bottom: 20px; }
-    label { display: block; margin-top: 10px; color: #9aa6b2; font-size: 14px; }
-    input[type="text"], input[type="date"] {
-      width: 100%; padding: 8px; margin-top: 5px; border-radius: 6px; border: none; background: rgba(255,255,255,0.1); color: #e6eef6;
-    }
-    button {
-      margin-top: 15px; padding: 10px 14px; border-radius: 8px;
-      background: linear-gradient(90deg,#46b3ff,#2bd0a6); color: #022; font-weight: bold; border: none; cursor: pointer; width: 100%;
-    }
-    pre {
-      background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px;
-      overflow-y: auto; font-size: 12px; color: #b8cbe3; max-height: 60vh; width: 90%;
+    /* Titles */
+    h2 {
+      color: #46b3ff;
+      margin-bottom: 20px;
     }
 
-    /* Activity + Weather tag input */
-    .tag-input { display: flex; flex-wrap: wrap; background: rgba(255,255,255,0.1); border-radius: 6px; padding: 6px; cursor: text; }
-    .tag { background: #46b3ff; color: #022; border-radius: 4px; padding: 4px 8px; margin: 3px; display: flex; align-items: center; font-size: 13px; }
-    .tag span { margin-left: 6px; cursor: pointer; font-weight: bold; }
-    .tag-input input { border: none; background: transparent; color: #e6eef6; outline: none; padding: 6px; flex: 1; font-size: 14px; min-width: 100px; }
-    .suggestions {
-      background: #0b1220; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; margin-top: 4px;
-      max-height: 120px; overflow-y: auto; display: none; position: relative; z-index: 999; width: 100%;
+    label {
+      display: block;
+      margin-top: 10px;
+      color: #9aa6b2;
+      font-size: 14px;
     }
-    .suggestions div { padding: 6px 10px; cursor: pointer; }
-    .suggestions div:hover { background: rgba(70,179,255,0.2); }
-    .date-range { display: flex; gap: 8px; width: 100%; }
+
+    input[type="text"], input[type="date"] {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border-radius: 6px;
+      border: none;
+      background: rgba(255,255,255,0.1);
+      color: #e6eef6;
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      background: linear-gradient(90deg,#46b3ff,#2bd0a6);
+      color: #022;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    pre {
+      background: rgba(255,255,255,0.05);
+      padding: 10px;
+      border-radius: 8px;
+      overflow-y: auto;
+      font-size: 12px;
+      color: #b8cbe3;
+      max-height: 60vh;
+      width: 90%;
+    }
+
+    /* Activity tag input */
+    .tag-input {
+      display: flex;
+      flex-wrap: wrap;
+      background: rgba(255,255,255,0.1);
+      border-radius: 6px;
+      padding: 6px;
+      cursor: text;
+    }
+
+    .tag {
+      background: #46b3ff;
+      color: #022;
+      border-radius: 4px;
+      padding: 4px 8px;
+      margin: 3px;
+      display: flex;
+      align-items: center;
+      font-size: 13px;
+    }
+
+    .tag span {
+      margin-left: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .tag-input input {
+      border: none;
+      background: transparent;
+      color: #e6eef6;
+      outline: none;
+      padding: 6px;
+      flex: 1;
+      font-size: 14px;
+      min-width: 100px;
+    }
+
+    .suggestions {
+      background: #0b1220;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 6px;
+      margin-top: 4px;
+      max-height: 120px;
+      overflow-y: auto;
+      display: none;
+      position: relative;
+      z-index: 999;
+      width: 100%;
+    }
+
+    .suggestions div {
+      padding: 6px 10px;
+      cursor: pointer;
+    }
+
+    .suggestions div:hover {
+      background: rgba(70,179,255,0.2);
+    }
+
+    .date-range {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+    }
   </style>
 </head>
 <body>
+  <!-- LEFT: Search tools -->
   <div class="panel" id="left-panel">
     <div style="width:80%; max-width:300px;">
       <h2>WeatherWary.Earth</h2>
@@ -88,9 +185,9 @@
         <input id="toDate" type="date" />
       </div>
 
-      <label>Activities & Weather</label>
+      <label>Activities</label>
       <div class="tag-input" id="activityTags">
-        <input type="text" id="activitySearchInput" placeholder="Search activities or weather..." />
+        <input type="text" id="activitySearchInput" placeholder="Search activities..." />
       </div>
       <div class="suggestions" id="activitySuggestions"></div>
 
@@ -99,10 +196,12 @@
     </div>
   </div>
 
+  <!-- CENTER: Map -->
   <div class="panel" id="center-panel">
     <div id="map"></div>
   </div>
 
+  <!-- RIGHT: Results -->
   <div class="panel" id="right-panel">
     <div style="width:80%;max-width:400px;display:flex;flex-direction:column;align-items:center;">
       <h2>Results</h2>
@@ -110,132 +209,220 @@
     </div>
   </div>
 
-<script>
-const activityMap = {
-  "Unspecified": ["t_2m:C,precip_1h:mm,wind_speed_10m:ms,relative_humidity_2m:p"],
-  "Outdoor Celebration": ["t_2m:C,precip_1h:mm,wind_speed_10m:ms"],
-  "Hiking": ["t_2m:C,precip_1h:mm,wind_speed_10m:ms,relative_humidity_2m:p,forest_fire_risk_index,sunset"],
-  "Fishing": ["t_2m:C,precip_1h:mm,wind_speed_10m:ms,ocean_current_speed:m/s,ocean_current_direction:d"],
-  "Swimming": ["t_2m:C,precip_1h:mm,wind_speed_10m:ms,relative_humidity_2m:p,uv_index,ocean_current_speed:m/s,water_temperature_0m:C,wave_height:m"],
-  "Skiing": ["t_2m:C,precip_1h:mm,wind_speed_10m:ms,relative_humidity_2m:p,snow_height_0cm:cm,snowfall_24h:cm,fresh_snow_24h:cm,sunrise,sunset"],
-  "Camping": ["t_2m:C,precip_1h:mm,wind_speed_10m:ms,relative_humidity_2m:p,sunrise,sunset"],
-  "Outdoor Exercise": ["t_2m:C,precip_1h:mm,wind_speed_10m:ms,relative_humidity_2m:p,uv_index"],
-  "Wind Sailing": ["t_2m:C,precip_1h:mm,wind_speed_10m:ms,relative_humidity_2m:p,ocean_current_speed:m/s,ocean_current_direction:d,wave_height:m"],
-  // Weather tags
-  "Sunny": ["t_2m:C,uv_index,sunrise,sunset"],
-  "Cloudy": ["t_2m:C,precip_1h:mm,wind_speed_10m:ms"],
-  "Rainy": ["t_2m:C,precip_1h:mm,wind_speed_10m:ms,relative_humidity_2m:p"],
-  "Windy": ["wind_speed_10m:ms,t_2m:C"]
-};
+  <script>
+//    const username = "gpmorgan_kuba_albert";
+//    const password = "x7X5RWbA19ViDr4ZQ45O";
 
-const allActivities = Object.keys(activityMap);
-const selectedActivities = [];
-const state = { marker: null, latLng: null };
+    const activityMap = {
+      "Unspecified": ["t_2m:C,precip_1h:mm,wind_speed_10m:ms,relative_humidity_2m:p"],
+      "Outdoor Celebration": ["t_2m:C,precip_1h:mm,wind_speed_10m:ms"],
+      "Hiking": ["t_2m:C,precip_1h:mm,wind_speed_10m:ms,relative_humidity_2m:p,forest_fire_risk_index,sunset"],
+      "Fishing": ["t_2m:C,precip_1h:mm,wind_speed_10m:ms,ocean_current_speed:m/s,ocean_current_direction:d"],
+      "Swimming": ["t_2m:C,precip_1h:mm,wind_speed_10m:ms,relative_humidity_2m:p,uv_index,ocean_current_speed:m/s,water_temperature_0m:C,wave_height:m"],
+      "Skiing": ["t_2m:C,precip_1h:mm,wind_speed_10m:ms,relative_humidity_2m:p,snow_height_0cm:cm,snowfall_24h:cm,fresh_snow_24h:cm,sunrise,sunset"],
+      "Camping": ["t_2m:C,precip_1h:mm,wind_speed_10m:ms,relative_humidity_2m:p,sunrise,sunset"],
+      "Outdoor Exercise": ["t_2m:C,precip_1h:mm,wind_speed_10m:ms,relative_humidity_2m:p,uv_index"],
+      "Wind Sailing": ["t_2m:C,precip_1h:mm,wind_speed_10m:ms,relative_humidity_2m:p,ocean_current_speed:m/s,ocean_current_direction:d,wave_height:m"]
+    };
 
-// ---- Activity tag system ----
-const input = document.getElementById('activitySearchInput');
-const suggestions = document.getElementById('activitySuggestions');
-const tagContainer = document.getElementById('activityTags');
+    const allActivities = Object.keys(activityMap);
+    const selectedActivities = [];
 
-input.addEventListener('input', () => {
-  const value = input.value.toLowerCase();
-  suggestions.innerHTML = '';
-  if (!value) { suggestions.style.display = 'none'; return; }
-  const matches = allActivities.filter(a => a.toLowerCase().includes(value) && !selectedActivities.includes(a));
-  if (matches.length === 0) { suggestions.style.display = 'none'; return; }
-  matches.forEach(m => {
-    const div = document.createElement('div');
-    div.textContent = m;
-    div.addEventListener('click', () => addTag(m));
-    suggestions.appendChild(div);
-  });
-  suggestions.style.display = 'block';
-});
+    const state = { marker: null, latLng: null };
 
-input.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && input.value.trim()) { e.preventDefault(); addTag(input.value.trim()); }
-});
+    // ---- Activity tag system ----
+    const input = document.getElementById('activitySearchInput');
+    const suggestions = document.getElementById('activitySuggestions');
+    const tagContainer = document.getElementById('activityTags');
 
-document.addEventListener('click', e => { if (!tagContainer.contains(e.target)) suggestions.style.display = 'none'; });
+    input.addEventListener('input', () => {
+      const value = input.value.toLowerCase();
+      suggestions.innerHTML = '';
+      if (!value) { suggestions.style.display = 'none'; return; }
 
-function addTag(name) {
-  const match = allActivities.find(a => a.toLowerCase() === name.toLowerCase());
-  const activity = match || "Unspecified";
-  if (selectedActivities.includes(activity)) return;
-  selectedActivities.push(activity);
-  const tag = document.createElement('div');
-  tag.className = 'tag';
-  tag.innerHTML = `${activity}<span>&times;</span>`;
-  tag.querySelector('span').addEventListener('click', () => { tag.remove(); selectedActivities.splice(selectedActivities.indexOf(activity), 1); });
-  tagContainer.insertBefore(tag, input);
-  input.value = '';
-  suggestions.style.display = 'none';
-}
+      const matches = allActivities.filter(a => a.toLowerCase().includes(value) && !selectedActivities.includes(a));
+      if (matches.length === 0) { suggestions.style.display = 'none'; return; }
 
-// ---- Map + Weather ----
-function initMap() {
-  const map = new google.maps.Map(document.getElementById('map'), { center: { lat: 20, lng: 0 }, zoom: 2, streetViewControl: false });
-  map.addListener('click', e => placeMarker(e.latLng, map));
+      matches.forEach(m => {
+        const div = document.createElement('div');
+        div.textContent = m;
+        div.addEventListener('click', () => addTag(m));
+        suggestions.appendChild(div);
+      });
+      suggestions.style.display = 'block';
+    });
 
-  const inputSearch = document.getElementById('placeSearch');
-  const autocomplete = new google.maps.places.Autocomplete(inputSearch);
-  autocomplete.bindTo('bounds', map);
-  autocomplete.addListener('place_changed', () => {
-    const place = autocomplete.getPlace();
-    if (!place.geometry) { alert('Selected place has no geometry'); return; }
-    map.panTo(place.geometry.location); map.setZoom(6);
-    placeMarker(place.geometry.location, map);
-  });
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && input.value.trim()) {
+        e.preventDefault();
+        addTag(input.value.trim());
+      }
+    });
 
-  document.getElementById('locateMe').addEventListener('click', () => {
-    if (!navigator.geolocation) { alert('Geolocation not supported'); return; }
-    navigator.geolocation.getCurrentPosition(pos => {
-      const p = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-      map.panTo(p); map.setZoom(6); placeMarker(p, map);
-    }, err => alert('Unable to get location: ' + err.message));
-  });
+    document.addEventListener('click', e => {
+      if (!tagContainer.contains(e.target)) suggestions.style.display = 'none';
+    });
 
-  document.getElementById('getWeather').addEventListener('click', getWeatherData);
-  document.getElementById('exportQuery').addEventListener('click', exportJSON);
+    function addTag(name) {
+      const match = allActivities.find(a => a.toLowerCase() === name.toLowerCase());
+      const activity = match || "Unspecified";
+      if (selectedActivities.includes(activity)) return;
+      selectedActivities.push(activity);
+      const tag = document.createElement('div');
+      tag.className = 'tag';
+      tag.innerHTML = `${activity}<span>&times;</span>`;
+      tag.querySelector('span').addEventListener('click', () => {
+        tag.remove();
+        selectedActivities.splice(selectedActivities.indexOf(activity), 1);
+      });
+      tagContainer.insertBefore(tag, input);
+      input.value = '';
+      suggestions.style.display = 'none';
+    }
 
-  function placeMarker(latLng, map) {
-    if (state.marker) state.marker.setMap(null);
-    state.marker = new google.maps.Marker({ position: latLng, map: map });
-    const lat = typeof latLng.lat === 'function' ? latLng.lat() : latLng.lat;
-    const lng = typeof latLng.lng === 'function' ? latLng.lng() : latLng.lng;
-    state.latLng = { lat, lng };
-  }
-}
+    // ---- Map + Weather ----
+    function initMap() {
+      const map = new google.maps.Map(document.getElementById('map'), {
+        center: { lat: 20, lng: 0 },
+        zoom: 2,
+        streetViewControl: false,
+      });
+
+      map.addListener('click', (e) => placeMarker(e.latLng, map));
+
+      const inputSearch = document.getElementById('placeSearch');
+      const autocomplete = new google.maps.places.Autocomplete(inputSearch);
+      autocomplete.bindTo('bounds', map);
+      autocomplete.addListener('place_changed', () => {
+        const place = autocomplete.getPlace();
+        if (!place.geometry) {
+          alert('Selected place has no geometry');
+          return;
+        }
+        map.panTo(place.geometry.location);
+        map.setZoom(6);
+        placeMarker(place.geometry.location, map);
+      });
+
+      document.getElementById('locateMe').addEventListener('click', () => {
+        if (!navigator.geolocation) {
+          alert('Geolocation not supported');
+          return;
+        }
+        navigator.geolocation.getCurrentPosition(pos => {
+          const p = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+          map.panTo(p);
+          map.setZoom(6);
+          placeMarker(p, map);
+        }, err => alert('Unable to get location: ' + err.message));
+      });
+
+      document.getElementById('getWeather').addEventListener('click', getWeatherData);
+      document.getElementById('exportQuery').addEventListener('click', exportJSON);
+
+      function placeMarker(latLng, map) {
+        if (state.marker) state.marker.setMap(null);
+        state.marker = new google.maps.Marker({ position: latLng, map: map });
+        
+        // This robustly checks if lat/lng are functions or properties
+        const lat = typeof latLng.lat === 'function' ? latLng.lat() : latLng.lat;
+        const lng = typeof latLng.lng === 'function' ? latLng.lng() : latLng.lng;
+        state.latLng = { lat, lng };
+      }
+    }
 
 async function getWeatherData() {
-  if (!state.latLng) { alert("Please select a location."); return; }
+  if (!state.latLng) {
+    alert("Please select a location on the map or search.");
+    return;
+  }
+
   const fromDate = document.getElementById('fromDate').value;
   const toDate = document.getElementById('toDate').value;
-  if (!fromDate || !toDate) { alert("Please select start and end date."); return; }
+  if (!fromDate || !toDate) {
+    alert("Please select a start and end date.");
+    return;
+  }
+
   if (selectedActivities.length === 0) selectedActivities.push("Unspecified");
-  const parameters = selectedActivities.map(a => activityMap[a][0]).join(",").split(",").filter((v,i,a)=>a.indexOf(v)===i).join(",");
-  const startISO = new Date(fromDate).toISOString().split('T')[0]+"T00:00:00Z";
-  const endISO = new Date(toDate).toISOString().split('T')[0]+"T23:59:00Z";
-  const url = `/api/getWeather?lat=${state.latLng.lat}&lng=${state.latLng.lng}&startISO=${startISO}&endISO=${endISO}&parameters=${parameters}`;
+
+  const parameters = selectedActivities
+    .map(a => activityMap[a][0])
+    .join(",")
+    .split(",")
+    .filter((v, i, a) => a.indexOf(v) === i)
+    .join(",");
+
+  const start = new Date(fromDate);
+  const end = new Date(toDate);
   const outputElement = document.getElementById('weatherOutput');
-  outputElement.textContent = 'Fetching weather...';
-  try {
-    const res = await fetch(url);
-    const data = await res.json();
-    if (!res.ok) throw new Error(`HTTP ${res.status} - ${data.error}`);
-    outputElement.textContent = JSON.stringify(data, null, 2);
-  } catch(err) { outputElement.textContent = "Error fetching weather: "+err.message; }
+  outputElement.textContent = "Fetching weather...";
+
+  // We'll fetch daily weather for each date in range
+  const results = {};
+
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+    const iso = d.toISOString().split('T')[0] + "T00:00:00Z";
+    const url = `https://api.meteomatics.com/${iso}/${parameters}/${state.latLng.lat},${state.latLng.lng}/json`;
+
+    try {
+      const res = await fetch(url, {
+        headers: {
+          'Authorization': 'Basic ' + btoa(username + ':' + password)
+        }
+      });
+      if (!res.ok) {
+        const t = await res.text();
+        throw new Error(t);
+      }
+      const data = await res.json();
+      results[iso.split('T')[0]] = {};
+      data.data.forEach(p => {
+        results[iso.split('T')[0]][p.parameter] = p.coordinates[0].dates[0].value;
+      });
+    } catch (e) {
+      results[iso.split('T')[0]] = { error: e.message };
+    }
+  }
+
+  // Build HTML table
+  const allKeys = new Set();
+  Object.values(results).forEach(day => Object.keys(day).forEach(k => allKeys.add(k)));
+  const keysArray = Array.from(allKeys);
+
+  let html = "<table><tr><th>Date</th>";
+  keysArray.forEach(k => html += `<th>${k}</th>`);
+  html += "</tr>";
+
+  Object.entries(results).forEach(([date, day]) => {
+    html += `<tr><td>${date}</td>`;
+    keysArray.forEach(k => html += `<td>${day[k] !== undefined ? day[k] : "-"}</td>`);
+    html += "</tr>";
+  });
+  html += "</table>";
+
+  outputElement.innerHTML = html;
 }
 
-function exportJSON() {
-  const fromDate = document.getElementById('fromDate').value;
-  const toDate = document.getElementById('toDate').value;
-  const data = { location: state.latLng, timeWindow: { from: fromDate, to: toDate }, activities: selectedActivities, createdAt: new Date().toISOString() };
-  const blob = new Blob([JSON.stringify(data,null,2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='weather_query.json'; a.click(); URL.revokeObjectURL(url);
-}
-</script>
+    function exportJSON() {
+      const fromDate = document.getElementById('fromDate').value;
+      const toDate = document.getElementById('toDate').value;
+      const data = {
+        location: state.latLng,
+        timeWindow: { from: fromDate, to: toDate },
+        activities: selectedActivities,
+        createdAt: new Date().toISOString()
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'weather_query.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  </script>
 
-<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDkk5aRWm5Yr_X9GhJIjljLgVL9jXlZ_0k&libraries=places&callback=initMap"></script>
+   <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDkk5aRWm5Yr_X9GhJIjljLgVL9jXlZ_0k&libraries=places&callback=initMap"></script>
 </body>
 </html>
