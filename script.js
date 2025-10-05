@@ -1,15 +1,15 @@
-let map, service, geocoder, markers = [];
+let map, service, markers = [];
 let state = { searchCenter: null };
 
 function initMap() {
     map = new google.maps.Map(document.getElementById("map"), {
         zoom: 2,
         center: { lat: 20, lng: 0 },
-        mapTypeControl: true,
-        streetViewControl: false,
+        // --- THIS IS THE ONLY CHANGE ---
+        mapTypeControl: true, // This enables the Road/Satellite view switcher
+        streetViewControl: false, // Street View remains off
     });
     service = new google.maps.places.PlacesService(map);
-    geocoder = new google.maps.Geocoder(); // Initialize the geocoder
 
     const citySearchInput = document.getElementById('citySearch');
     const autocomplete = new google.maps.places.Autocomplete(citySearchInput, { types: ['(cities)'] });
@@ -22,69 +22,8 @@ function initMap() {
         map.setZoom(10);
         state.searchCenter = place.geometry.location;
     });
-
     document.getElementById("findPlaces").addEventListener("click", findPlacesAndWeather);
-
-    // --- NEW: Set default values on page load ---
-    setDefaultValues();
 }
-
-// --- NEW FUNCTION: Sets default dates and tries to get user's location ---
-function setDefaultValues() {
-    // 1. Set Default Date Range
-    const fromDateInput = document.getElementById('fromDate');
-    const toDateInput = document.getElementById('toDate');
-
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
-    const twoWeeks = new Date();
-    twoWeeks.setDate(tomorrow.getDate() + 14);
-
-    // Helper function to format date as YYYY-MM-DD
-    const formatDate = (date) => date.toISOString().split('T')[0];
-
-    fromDateInput.value = formatDate(tomorrow);
-    toDateInput.value = formatDate(twoWeeks);
-
-
-    // 2. Set Default Location to User's Current Location
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                const userLocation = {
-                    lat: position.coords.latitude,
-                    lng: position.coords.longitude,
-                };
-                
-                state.searchCenter = new google.maps.LatLng(userLocation.lat, userLocation.lng);
-                map.setCenter(state.searchCenter);
-                map.setZoom(10);
-
-                // Reverse geocode to find the city name and update the search bar
-                geocoder.geocode({ location: userLocation }, (results, status) => {
-                    if (status === "OK" && results[0]) {
-                        // Find the city component from the address
-                        const addressComponents = results[0].address_components;
-                        const city = addressComponents.find(c => c.types.includes("locality"))?.long_name;
-                        const country = addressComponents.find(c => c.types.includes("country"))?.long_name;
-                        if (city && country) {
-                            document.getElementById('citySearch').value = `${city}, ${country}`;
-                        }
-                    } else {
-                        console.warn("Reverse geocode was not successful for the following reason: " + status);
-                    }
-                });
-            },
-            () => {
-                // User denied location access or an error occurred.
-                // The app will just wait for manual input.
-                console.log("Geolocation access denied. App will wait for manual city search.");
-            }
-        );
-    }
-}
-
 
 async function findPlacesAndWeather() {
     if (!state.searchCenter) {
@@ -118,6 +57,7 @@ async function findPlacesAndWeather() {
             return;
         }
 
+        // Filter the results to only include places within 100km
         const nearbyPlaces = places.filter(place => {
             place.distance = google.maps.geometry.spherical.computeDistanceBetween(state.searchCenter, place.geometry.location);
             return place.distance <= 100000;
@@ -131,6 +71,7 @@ async function findPlacesAndWeather() {
         resultsList.innerHTML = `<li>Found ${nearbyPlaces.length} places. Fetching weather data...</li>`;
 
         try {
+            // Fetch weather ONLY for the nearby places
             const weatherPromises = nearbyPlaces.map(place => {
                 const loc = place.geometry.location;
                 const url = `/api/getWeather?lat=${loc.lat()}&lng=${loc.lng()}&startISO=${new Date(fromDate).toISOString().slice(0,10)}T00:00:00Z&endISO=${new Date(toDate).toISOString().slice(0,10)}T23:59:00Z&parameters=t_2m:C,precip_1h:mm`;
