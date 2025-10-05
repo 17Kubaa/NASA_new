@@ -1,13 +1,12 @@
 let map, service, geocoder, markers = [];
 let state = { searchCenter: null };
 
-// --- UPDATED: Map of weather conditions to YOUR new SVG icon URLs ---
 const weatherIconMap = {
-    sunny: 'https://raw.githubusercontent.com/17Kubaa/NASA_new/main/SVGs/cloudysunny-cropped.svg', // Assuming this is for mostly sunny
+    sunny: 'https://raw.githubusercontent.com/17Kubaa/NASA_new/main/SVGs/cloudysunny-cropped.svg',
     cloudy: 'https://raw.githubusercontent.com/17Kubaa/NASA_new/main/SVGs/cloudy-cropped.svg',
     rainy: 'https://raw.githubusercontent.com/17Kubaa/NASA_new/main/SVGs/rainycloudy-cropped.svg',
     snowy: 'https://raw.githubusercontent.com/17Kubaa/NASA_new/main/SVGs/Snowy-cropped.svg',
-    default: 'https://raw.githubusercontent.com/17Kubaa/NASA_new/main/SVGs/cloudy-cropped.svg' // Fallback icon
+    default: 'https://raw.githubusercontent.com/17Kubaa/NASA_new/main/SVGs/cloudy-cropped.svg'
 };
 
 function initMap() {
@@ -127,7 +126,6 @@ function sortResults(results, activity) {
     });
 }
 
-// UPDATED: Logic now matches your available icons better
 function calculateWeatherAverages(weatherData) {
     if (!weatherData || !weatherData.data || weatherData.status !== "OK") {
         return { avgTemp: 'N/A', avgPrecip: 'N/A', condition: 'default' };
@@ -144,15 +142,10 @@ function calculateWeatherAverages(weatherData) {
     const avgTemp = tempCount > 0 ? (tempSum / tempCount) : 'N/A';
     const avgPrecip = precipCount > 0 ? (precipSum / precipCount) : 'N/A';
 
-    // Determine the overall weather condition based on new icon names
-    let condition = 'cloudy'; // Default
-    if (avgPrecip > 0.5) {
-        condition = 'rainy'; // Maps to rainycloudy-cropped.svg
-    } else if (avgTemp < 2) {
-        condition = 'snowy'; // Maps to Snowy-cropped.svg
-    } else if (avgPrecip < 0.1 && avgTemp > 15) {
-        condition = 'sunny'; // Maps to cloudysunny-cropped.svg
-    }
+    let condition = 'cloudy';
+    if (avgPrecip > 0.5) { condition = 'rainy'; }
+    else if (avgTemp < 2) { condition = 'snowy'; }
+    else if (avgPrecip < 0.1 && avgTemp > 15) { condition = 'sunny'; }
 
     return {
         avgTemp: avgTemp !== 'N/A' ? avgTemp.toFixed(1) : 'N/A',
@@ -161,6 +154,7 @@ function calculateWeatherAverages(weatherData) {
     };
 }
 
+// --- UPDATED: This function now adds the date and day of the week ---
 function createUnifiedListItemAndMarker(result) {
     const place = result.place;
     const weather = result.weather;
@@ -171,8 +165,14 @@ function createUnifiedListItemAndMarker(result) {
     const li = document.createElement("li");
     li.className = 'result-item';
     const distanceInKm = (place.distance / 1000).toFixed(1);
-    
     const iconSrc = weatherIconMap[weather.condition] || weatherIconMap.default;
+
+    // --- NEW: Get and format the start date ---
+    const fromDateValue = document.getElementById('fromDate').value;
+    // Create date object correctly to avoid timezone issues
+    const startDate = new Date(fromDateValue + 'T00:00:00');
+    const dayOfWeek = startDate.toLocaleDateString('en-US', { weekday: 'long' });
+    const formattedDate = startDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
 
     li.innerHTML = `
       <img src="${iconSrc}" alt="${weather.condition}" class="weather-icon">
@@ -190,6 +190,9 @@ function createUnifiedListItemAndMarker(result) {
             ${weather.avgPrecip} mm
             <span>Avg. Precip</span>
           </div>
+        </div>
+        <div class="event-date">
+          ${dayOfWeek}, ${formattedDate}
         </div>
       </div>
     `;
