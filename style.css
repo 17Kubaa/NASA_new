@@ -1,7 +1,6 @@
 /* Define a modern color palette and consistent properties */
 :root {
   --background-darker: #0b1220;
-  --background-dark: #0f1724;
   --background-panel: #152338;
   --text-primary: #e6eef6;
   --text-secondary: #9aa6b2;
@@ -14,7 +13,7 @@
 
 /* Add a smooth font and box-sizing reset */
 * {
-  box-sizing: border-box;
+  box-sizing: box-border;
 }
 
 body {
@@ -48,7 +47,7 @@ body {
   background: radial-gradient(
     circle at center,
     var(--background-panel),
-    var(--background-dark)
+    var(--background-darker)
   );
 }
 #right-panel {
@@ -206,3 +205,4 @@ button:hover {
   width: 100%;
 
 }
+
