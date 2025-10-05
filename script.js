@@ -46,7 +46,7 @@ async function findPlacesAndWeather() {
     const request = {
         location: state.searchCenter,
         radius: 50000,
-        query: activity,
+        query: '${activity} in ${country}',
         fields: ["name", "geometry"]
     };
 
@@ -170,4 +170,5 @@ function createUnifiedListItemAndMarker(result) {
     };
     li.addEventListener('click', clickHandler);
     marker.addListener('click', clickHandler);
+
 }
