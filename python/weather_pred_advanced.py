@@ -14,7 +14,7 @@ from flask_cors import CORS
 csv_file = "weather_extract.csv"
 
 # for now let me assume that the format is correct, dates are given as year col, month col, day col
-weather_nd = np.loadtxt(csv_file, delimiter=',',)
+# weather_nd = np.loadtxt(csv_file, delimiter=',',)
 
 # simulated data
 N = len(weather_nd)
