@@ -1,13 +1,13 @@
 let map, service, geocoder, markers = [];
 let state = { searchCenter: null };
 
-// --- NEW: Map of weather conditions to SVG icon URLs ---
+// --- UPDATED: Map of weather conditions to YOUR new SVG icon URLs ---
 const weatherIconMap = {
-    sunny: 'https://raw.githubusercontent.com/17Kubaa/NASA_new/main/SVGs/clear-day.svg',
-    cloudy: 'https://raw.githubusercontent.com/17Kubaa/NASA_new/main/SVGs/cloudy.svg',
-    rainy: 'https://raw.githubusercontent.com/17Kubaa/NASA_new/main/SVGs/rain.svg',
-    snowy: 'https://raw.githubusercontent.com/17Kubaa/NASA_new/main/SVGs/snow.svg',
-    default: 'https://raw.githubusercontent.com/17Kubaa/NASA_new/main/SVGs/cloudy.svg' // Fallback icon
+    sunny: 'https://raw.githubusercontent.com/17Kubaa/NASA_new/main/SVGs/cloudysunny-cropped.svg', // Assuming this is for mostly sunny
+    cloudy: 'https://raw.githubusercontent.com/17Kubaa/NASA_new/main/SVGs/cloudy-cropped.svg',
+    rainy: 'https://raw.githubusercontent.com/17Kubaa/NASA_new/main/SVGs/rainycloudy-cropped.svg',
+    snowy: 'https://raw.githubusercontent.com/17Kubaa/NASA_new/main/SVGs/Snowy-cropped.svg',
+    default: 'https://raw.githubusercontent.com/17Kubaa/NASA_new/main/SVGs/cloudy-cropped.svg' // Fallback icon
 };
 
 function initMap() {
@@ -120,14 +120,14 @@ function sortResults(results, activity) {
         if (a.weather.avgTemp === 'N/A') return 1; if (b.weather.avgTemp === 'N/A') return -1;
         switch (activity) {
             case 'hiking trails': return a.weather.avgPrecip - b.weather.avgPrecip;
-            case 'beaches': return b.weather.avgTemp - a.weather.avgTemp;
+            case 'beaches': return b.weather.avgTemp - b.weather.avgTemp;
             case 'ski resorts': return a.weather.avgTemp - b.weather.avgTemp;
             default: return a.place.distance - b.place.distance;
         }
     });
 }
 
-// --- UPDATED: This function now also returns a weather condition string ---
+// UPDATED: Logic now matches your available icons better
 function calculateWeatherAverages(weatherData) {
     if (!weatherData || !weatherData.data || weatherData.status !== "OK") {
         return { avgTemp: 'N/A', avgPrecip: 'N/A', condition: 'default' };
@@ -144,14 +144,14 @@ function calculateWeatherAverages(weatherData) {
     const avgTemp = tempCount > 0 ? (tempSum / tempCount) : 'N/A';
     const avgPrecip = precipCount > 0 ? (precipSum / precipCount) : 'N/A';
 
-    // Determine the overall weather condition
-    let condition = 'cloudy';
+    // Determine the overall weather condition based on new icon names
+    let condition = 'cloudy'; // Default
     if (avgPrecip > 0.5) {
-        condition = 'rainy';
+        condition = 'rainy'; // Maps to rainycloudy-cropped.svg
     } else if (avgTemp < 2) {
-        condition = 'snowy';
-    } else if (avgPrecip < 0.1 && avgTemp > 20) {
-        condition = 'sunny';
+        condition = 'snowy'; // Maps to Snowy-cropped.svg
+    } else if (avgPrecip < 0.1 && avgTemp > 15) {
+        condition = 'sunny'; // Maps to cloudysunny-cropped.svg
     }
 
     return {
@@ -161,7 +161,6 @@ function calculateWeatherAverages(weatherData) {
     };
 }
 
-// --- UPDATED: This function now adds the weather icon ---
 function createUnifiedListItemAndMarker(result) {
     const place = result.place;
     const weather = result.weather;
@@ -173,7 +172,6 @@ function createUnifiedListItemAndMarker(result) {
     li.className = 'result-item';
     const distanceInKm = (place.distance / 1000).toFixed(1);
     
-    // Select the correct icon URL based on the weather condition
     const iconSrc = weatherIconMap[weather.condition] || weatherIconMap.default;
 
     li.innerHTML = `
