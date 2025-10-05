@@ -26,11 +26,11 @@ body {
   overflow: hidden;
 }
 
-/* --- NEW: LOGO STYLING --- */
+/* --- MODIFIED: LOGO STYLING --- */
 .logo {
-  width: 120px;
+  width: 150px; /* Increased from 120px */
   height: auto;
-  margin: 0 auto 10px auto;
+  margin: 0 auto 15px auto; /* Increased bottom margin */
   display: block;
 }
 
@@ -103,7 +103,6 @@ button:hover {
   padding: 15px; border-radius: 8px; margin-bottom: 10px; cursor: pointer;
   background: rgba(255, 255, 255, 0.05); border: 1px solid transparent;
   transition: all 0.2s ease-in-out; animation: fadeIn 0.5s ease-out forwards;
-  /* UPDATED: Using flex to align icon and content */
   display: flex;
   align-items: center;
 }
@@ -111,12 +110,11 @@ button:hover {
   background: rgba(70, 179, 255, 0.1); border-color: var(--accent-primary); transform: scale(1.02);
 }
 
-/* NEW: Weather Icon Styling */
 .weather-icon {
   width: 40px;
   height: 40px;
   margin-right: 15px;
-  flex-shrink: 0; /* Prevents the icon from shrinking */
+  flex-shrink: 0;
 }
 
 .result-content { flex-grow: 1; }
