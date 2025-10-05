@@ -36,7 +36,7 @@ body {
   align-items: center;
   padding: 30px;
   transition: all 0.3s ease-in-out;
-  background-color: var(--background); /* unified background */
+  background-color: var(--background);
 }
 
 /* --- LAYOUT PROPORTIONS --- */
@@ -48,7 +48,7 @@ body {
 }
 
 #center-panel {
-  flex: 2; /* slightly smaller to allow side panels */
+  flex: 2;
   background-color: var(--background);
   display: flex;
   justify-content: center;
@@ -170,7 +170,7 @@ button:hover {
   transition: all 0.2s ease-in-out;
   animation: fadeIn 0.5s ease-out forwards;
   width: 100%;
-  max-width: 400px; /* wide enough for extra info */
+  max-width: 400px;
   font-size: 15px;
   line-height: 1.4;
 }
@@ -221,10 +221,15 @@ button:hover {
 
 .weather-info .weather-item {
   display: flex;
-  flex-direction: column; /* stack icon over value */
+  flex-direction: column; /* stack value on top of label */
   align-items: center;
   font-size: 0.9em;
   color: var(--text-primary);
+}
+
+.weather-info .weather-item .value {
+  font-weight: bold; /* bold values */
+  margin-bottom: 2px;
 }
 
 .weather-info .weather-item img,
