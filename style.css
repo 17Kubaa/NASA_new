@@ -1,8 +1,6 @@
 /* --- COLOR PALETTE --- */
 :root {
-  --background-darker: #0b1220;
-  --background-dark: #0f1724;
-  --background-panel: #152338;
+  --background: #0f1724; /* unified background for all panels */
   --text-primary: #e6eef6;
   --text-secondary: #9aa6b2;
   --accent-primary: #46b3ff;
@@ -22,7 +20,7 @@ body {
   font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   height: 100vh;
   display: flex;
-  background-color: var(--background-dark);
+  background-color: var(--background);
   color: var(--text-primary);
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
@@ -38,6 +36,7 @@ body {
   align-items: center;
   padding: 30px;
   transition: all 0.3s ease-in-out;
+  background-color: var(--background); /* unified background */
 }
 
 /* --- LAYOUT PROPORTIONS --- */
@@ -45,47 +44,31 @@ body {
   flex: 1;
   min-width: 350px;
   max-width: 400px;
-  background-color: var(--background-darker);
+  background-color: var(--background);
 }
-#left-panel { border-right: 1px solid var(--border-color); }
-#right-panel { border-left: 1px solid var(--border-color); }
 
 #center-panel {
-  flex: 2.5;
-  background: radial-gradient(circle at center, var(--background-panel), var(--background-dark));
-}
-
-/* --- LEFT PANEL LOGO & SEARCH WRAPPER --- */
-.left-top {
-  width: 100%;
+  flex: 2; /* slightly smaller to allow side panels */
+  background-color: var(--background);
   display: flex;
-  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  gap: 25px;
-}
-
-.left-top img.logo {
-  max-width: 80%;
-  height: auto;
-  display: block;
-  margin: 0 auto;
 }
 
 /* --- CONTENT WRAPPER --- */
 .content-wrapper {
-  width: 80%;
-  max-width: 320px;
+  width: 100%;
+  max-width: 420px; /* wider for results */
   height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  align-items: center;
 }
 
 /* --- MAP --- */
 #map {
-  width: 100%;
-  height: 85%;
+  width: 90%;
+  height: 70%;
   border-radius: 20px;
   overflow: hidden;
   box-shadow: 0 0 30px var(--shadow-color);
@@ -93,18 +76,28 @@ body {
   margin: 0 auto;
 }
 
-/* --- UI ELEMENTS --- */
+/* --- HEADINGS & LABELS --- */
+h2 {
+  color: var(--accent-primary);
+  margin-bottom: 20px;
+  font-weight: 600;
+  font-size: 1.3em;
+  text-align: center;
+}
+
 label {
   display: block;
-  margin-top: 15px;
+  margin-top: 12px;
   color: var(--text-secondary);
   font-size: 14px;
   font-weight: 500;
 }
+
+/* --- INPUTS & SELECT --- */
 input[type="date"], input[type="text"], select {
   width: 100%;
   padding: 10px;
-  margin-top: 8px;
+  margin-top: 6px;
   border-radius: 6px;
   border: 1px solid transparent;
   background: rgba(255, 255, 255, 0.07);
@@ -112,7 +105,9 @@ input[type="date"], input[type="text"], select {
   font-size: 14px;
   transition: all 0.2s ease-in-out;
 }
-select option { background: var(--background-darker); }
+
+select option { background: var(--background); }
+
 input[type="date"]:hover, input[type="text"]:hover, select:hover { border-color: var(--border-color); }
 input[type="date"]:focus, input[type="text"]:focus, select:focus {
   outline: none;
@@ -120,26 +115,28 @@ input[type="date"]:focus, input[type="text"]:focus, select:focus {
   box-shadow: 0 0 0 3px var(--interactive-glow);
 }
 
+/* --- BUTTON --- */
 button {
-  margin-top: 25px;
+  margin-top: 20px;
   padding: 12px 14px;
   border-radius: 8px;
   background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
-  color: #0b1220;
-  font-weight: bold;
+  color: var(--background);
+  font-weight: 600;
   font-size: 15px;
   border: none;
   cursor: pointer;
   width: 100%;
   transition: all 0.2s ease-in-out;
 }
+
 button:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   filter: brightness(1.1);
 }
 
-/* --- RESULTS LIST & SCROLLBAR HIDING --- */
+/* --- RESULTS LIST --- */
 #results-list {
   list-style: none;
   padding: 0;
@@ -150,67 +147,107 @@ button:hover {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
 #results-list::-webkit-scrollbar { display: none; }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
+/* --- RESULT ITEMS --- */
 .result-item {
-  padding: 12px;
-  border-radius: 8px;
-  margin-bottom: 8px;
+  padding: 18px 22px;
+  border-radius: 12px;
+  margin-bottom: 14px;
   cursor: pointer;
   background: rgba(255, 255, 255, 0.05);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border: 1px solid transparent;
   transition: all 0.2s ease-in-out;
   animation: fadeIn 0.5s ease-out forwards;
+  width: 100%;
+  font-size: 15px;
+  line-height: 1.4;
 }
+
 .result-item:hover {
   background: rgba(70, 179, 255, 0.1);
-  border-color: var(--accent-primary);
   transform: scale(1.02);
 }
 
-.place-info { flex-grow: 1; }
-.place-name { font-weight: 600; color: var(--text-primary); }
-.place-distance { font-size: 0.8em; color: var(--text-secondary); margin-top: 2px; }
+/* --- LEFT ICON / RATING --- */
+.result-item .left-rating {
+  font-weight: 600;
+  color: var(--accent-secondary);
+  margin-right: 14px;
+  flex-shrink: 0;
+}
 
-.weather-info { 
+/* --- PLACE INFO --- */
+.place-info {
+  flex-grow: 1;
+  text-align: left;
+}
+.place-name {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 1.05em;
+}
+.place-distance {
+  font-size: 0.8em;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+/* --- RIGHT EXTRA DATA --- */
+.result-item .right-data {
+  font-size: 14px;
+  color: var(--accent-primary);
+  margin-left: 14px;
+  flex-shrink: 0;
+  text-align: right;
+}
+
+/* --- WEATHER INFO (STACKED ICONS) --- */
+.weather-info {
   display: flex;
-  gap: 10px;
-  margin-left: 15px;
-  white-space: nowrap;
+  gap: 12px;
 }
 
 .weather-info .weather-item {
   display: flex;
-  flex-direction: column;
+  flex-direction: column; /* stack icon over value */
   align-items: center;
+  font-size: 0.9em;
+  color: var(--text-primary);
 }
 
-.weather-info img, .weather-info svg {
+.weather-info .weather-item img,
+.weather-info .weather-item svg {
   width: 36px;
   height: 36px;
   margin-bottom: 2px;
+  flex-shrink: 0;
   transition: transform 0.2s ease-in-out;
 }
 
-.weather-info span {
-  display: block;
+.result-item:hover .weather-info .weather-item img,
+.result-item:hover .weather-info .weather-item svg {
+  transform: scale(1.15);
+}
+
+.weather-info .weather-label {
   font-size: 0.75em;
   color: var(--text-secondary);
   font-weight: 400;
 }
 
-.result-item:hover .weather-info img,
-.result-item:hover .weather-info svg {
-  transform: scale(1.15);
+/* --- DATE RANGE --- */
+.date-range {
+  display: flex;
+  gap: 8px;
+  width: 100%;
 }
 
-.date-range { display: flex; gap: 8px; width: 100%; }
-
+/* --- FADE-IN ANIMATION --- */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
