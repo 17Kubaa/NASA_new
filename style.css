@@ -1,6 +1,8 @@
 /* --- COLOR PALETTE --- */
 :root {
-  --background: #0f1724; /* unified background for all panels */
+  --background-darker: #0b1220;
+  --background-dark: #0f1724;
+  --background-panel: #152338;
   --text-primary: #e6eef6;
   --text-secondary: #9aa6b2;
   --accent-primary: #46b3ff;
@@ -20,7 +22,7 @@ body {
   font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   height: 100vh;
   display: flex;
-  background-color: var(--background);
+  background-color: var(--background-dark);
   color: var(--text-primary);
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
@@ -32,11 +34,10 @@ body {
   height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
+  justify-content: center;
   align-items: center;
   padding: 30px;
   transition: all 0.3s ease-in-out;
-  background-color: var(--background); /* unified background */
 }
 
 /* --- LAYOUT PROPORTIONS --- */
@@ -44,36 +45,35 @@ body {
   flex: 1;
   min-width: 350px;
   max-width: 400px;
-  background-color: var(--background);
+  background-color: var(--background-darker);
 }
+#left-panel { border-right: 1px solid var(--border-color); }
+#right-panel { border-left: 1px solid var(--border-color); }
 
 #center-panel {
-  flex: 2; /* slightly smaller to allow side panels */
-  background-color: var(--background);
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  flex: 2; /* slightly smaller than before to fit side panels better */
+  background: radial-gradient(circle at center, var(--background-panel), var(--background-dark));
 }
 
 /* --- CONTENT WRAPPER --- */
 .content-wrapper {
-  width: 100%;
-  max-width: 420px; /* wider for results */
+  width: 80%;
+  max-width: 320px;
   height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
+  justify-content: center;
 }
 
 /* --- MAP --- */
 #map {
-  width: 90%;
-  height: 70%;
+  width: 95%; /* slightly smaller than container */
+  height: 80%; /* reduce height to give more breathing room */
   border-radius: 20px;
   overflow: hidden;
   box-shadow: 0 0 30px var(--shadow-color);
   border: 1px solid var(--border-color);
-  margin: 0 auto;
+  margin: 0 auto; /* center map */
 }
 
 /* --- HEADINGS & LABELS --- */
@@ -81,13 +81,12 @@ h2 {
   color: var(--accent-primary);
   margin-bottom: 20px;
   font-weight: 600;
-  font-size: 1.3em;
   text-align: center;
 }
 
 label {
   display: block;
-  margin-top: 12px;
+  margin-top: 15px;
   color: var(--text-secondary);
   font-size: 14px;
   font-weight: 500;
@@ -97,7 +96,7 @@ label {
 input[type="date"], input[type="text"], select {
   width: 100%;
   padding: 10px;
-  margin-top: 6px;
+  margin-top: 8px;
   border-radius: 6px;
   border: 1px solid transparent;
   background: rgba(255, 255, 255, 0.07);
@@ -106,7 +105,7 @@ input[type="date"], input[type="text"], select {
   transition: all 0.2s ease-in-out;
 }
 
-select option { background: var(--background); }
+select option { background: var(--background-darker); }
 
 input[type="date"]:hover, input[type="text"]:hover, select:hover { border-color: var(--border-color); }
 input[type="date"]:focus, input[type="text"]:focus, select:focus {
@@ -117,12 +116,12 @@ input[type="date"]:focus, input[type="text"]:focus, select:focus {
 
 /* --- BUTTON --- */
 button {
-  margin-top: 20px;
+  margin-top: 25px;
   padding: 12px 14px;
   border-radius: 8px;
   background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
-  color: var(--background);
-  font-weight: 600;
+  color: #0b1220;
+  font-weight: bold;
   font-size: 15px;
   border: none;
   cursor: pointer;
@@ -152,38 +151,38 @@ button:hover {
 
 /* --- RESULT ITEMS --- */
 .result-item {
-  padding: 18px 22px;
-  border-radius: 12px;
-  margin-bottom: 14px;
+  padding: 16px;
+  border-radius: 10px;
+  margin-bottom: 12px;
   cursor: pointer;
   background: rgba(255, 255, 255, 0.05);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  border: 1px solid transparent;
   transition: all 0.2s ease-in-out;
   animation: fadeIn 0.5s ease-out forwards;
-  width: 140%;
   font-size: 15px;
-  line-height: 1.4;
 }
 
 .result-item:hover {
   background: rgba(70, 179, 255, 0.1);
-  transform: scale(1.02);
+  border-color: var(--accent-primary);
+  transform: scale(1.03);
 }
 
-/* --- LEFT ICON / RATING --- */
+/* --- LEFT RATING --- */
 .result-item .left-rating {
   font-weight: 600;
   color: var(--accent-secondary);
-  margin-right: 14px;
+  margin-right: 12px;
   flex-shrink: 0;
 }
 
 /* --- PLACE INFO --- */
 .place-info {
   flex-grow: 1;
-  text-align: left;
+  text-align: center;
 }
 .place-name {
   font-weight: 600;
@@ -196,47 +195,43 @@ button:hover {
   margin-top: 2px;
 }
 
-/* --- RIGHT EXTRA DATA --- */
-.result-item .right-data {
-  font-size: 14px;
+/* --- RIGHT ICON --- */
+.result-item .right-icon {
+  font-size: 18px;
   color: var(--accent-primary);
-  margin-left: 14px;
+  margin-left: 12px;
   flex-shrink: 0;
-  text-align: right;
 }
 
-/* --- WEATHER INFO (STACKED ICONS) --- */
+/* --- WEATHER INFO --- */
 .weather-info {
   display: flex;
-  gap: 12px;
-}
-
-.weather-info .weather-item {
-  display: flex;
-  flex-direction: column; /* stack icon over value */
   align-items: center;
-  font-size: 0.9em;
+  gap: 10px;
+  text-align: right;
+  white-space: nowrap;
+  font-weight: 500;
+  font-size: 1.1em;
   color: var(--text-primary);
 }
 
-.weather-info .weather-item img,
-.weather-info .weather-item svg {
+.weather-info span {
+  display: block;
+  font-size: 0.75em;
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+.weather-info img, .weather-info svg {
   width: 36px;
   height: 36px;
-  margin-bottom: 2px;
   flex-shrink: 0;
   transition: transform 0.2s ease-in-out;
 }
 
-.result-item:hover .weather-info .weather-item img,
-.result-item:hover .weather-info .weather-item svg {
+.result-item:hover .weather-info img,
+.result-item:hover .weather-info svg {
   transform: scale(1.15);
-}
-
-.weather-info .weather-label {
-  font-size: 0.75em;
-  color: var(--text-secondary);
-  font-weight: 400;
 }
 
 /* --- DATE RANGE --- */
@@ -251,4 +246,3 @@ button:hover {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
-
