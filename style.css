@@ -23,7 +23,7 @@ body {
     Helvetica, Arial, sans-serif;
   height: 100vh;
   display: flex;
-  background-color: var(--background-dark);
+  background-color: var(--background-darker);
   color: var(--text-primary);
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
@@ -43,7 +43,6 @@ body {
 }
 #left-panel {
   background-color: var(--background-darker);
-  border-right: 1px solid var(--border-color);
 }
 #center-panel {
   background: radial-gradient(
@@ -54,7 +53,6 @@ body {
 }
 #right-panel {
   background-color: var(--background-darker);
-  border-left: 1px solid var(--border-color);
 }
 #map {
   width: 130%;
@@ -206,4 +204,5 @@ button:hover {
   display: flex;
   gap: 8px;
   width: 100%;
+
 }
