@@ -1,4 +1,4 @@
-/* --- COLOR PALETTE --- */
+/* --- COLOR PALETTE --- *
 :root {
   --background: #0f1724; /* unified background for all panels */
   --text-primary: #e6eef6;
@@ -162,7 +162,7 @@ button:hover {
   align-items: center;
   transition: all 0.2s ease-in-out;
   animation: fadeIn 0.5s ease-out forwards;
-  width: 100%;
+  width: 140%;
   font-size: 15px;
   line-height: 1.4;
 }
@@ -251,3 +251,4 @@ button:hover {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
