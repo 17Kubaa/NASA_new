@@ -170,6 +170,4 @@ function createUnifiedListItemAndMarker(result) {
     };
     li.addEventListener('click', clickHandler);
     marker.addListener('click', clickHandler);
-
 }
-
