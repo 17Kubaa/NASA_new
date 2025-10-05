@@ -4,12 +4,16 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>WeatherWary.Earth - Recommender</title>
+  
   <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
 </head>
 <body>
   <!-- LEFT: Search tools -->
   <div class="panel" id="left-panel">
-    <!-- This wrapper div constrains the content width -->
     <div class="content-wrapper">
       <h2>Discover & Plan</h2>
       <label for="citySearch">Search for a City</label>
@@ -40,7 +44,6 @@
 
   <!-- RIGHT: Results -->
   <div class="panel" id="right-panel">
-    <!-- This new wrapper div ensures alignment with the left panel -->
     <div class="content-wrapper">
       <h2>Results</h2>
       <ul id="results-list"></ul>
@@ -48,6 +51,6 @@
   </div>
 
   <script src="script.js"></script>
-<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDkk5aRWm5Yr_X9GhJIjljLgVL9jXlZ_0k&libraries=places,geometry&callback=initMap"></script>
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY_HERE&callback=initMap&libraries=places,geometry"></script>
 </body>
 </html>
