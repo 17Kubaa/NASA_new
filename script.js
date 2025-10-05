@@ -5,8 +5,9 @@ function initMap() {
     map = new google.maps.Map(document.getElementById("map"), {
         zoom: 2,
         center: { lat: 20, lng: 0 },
-        mapTypeControl: false,
-        streetViewControl: false,
+        // --- THIS IS THE ONLY CHANGE ---
+        mapTypeControl: true, // This enables the Road/Satellite view switcher
+        streetViewControl: false, // Street View remains off
     });
     service = new google.maps.places.PlacesService(map);
 
@@ -45,7 +46,7 @@ async function findPlacesAndWeather() {
 
     const request = {
         location: state.searchCenter,
-        radius: 50000, // This radius helps Google find initial candidates
+        radius: 50000,
         query: activity,
         fields: ["name", "geometry"]
     };
@@ -56,24 +57,16 @@ async function findPlacesAndWeather() {
             return;
         }
 
-        // --- START: MODIFIED LOGIC ---
-
-        // Step 1: Augment places with exact distance information
-        places.forEach(place => {
+        // Filter the results to only include places within 100km
+        const nearbyPlaces = places.filter(place => {
             place.distance = google.maps.geometry.spherical.computeDistanceBetween(state.searchCenter, place.geometry.location);
+            return place.distance <= 100000;
         });
-        
-        // Step 2: Filter the results to only include places within 100km (100,000 meters)
-        const nearbyPlaces = places.filter(place => place.distance <= 100000);
 
-        // Step 3: Check if any places remain after filtering.
         if (nearbyPlaces.length === 0) {
             resultsList.innerHTML = `<li>No results for '${activity}' found within 100km.</li>`;
-            return; // Stop execution here
+            return;
         }
-        
-        // --- END: MODIFIED LOGIC ---
-
 
         resultsList.innerHTML = `<li>Found ${nearbyPlaces.length} places. Fetching weather data...</li>`;
 
@@ -87,7 +80,6 @@ async function findPlacesAndWeather() {
 
             const weatherResults = await Promise.all(weatherPromises);
 
-            // Combine the nearby places, weather, and averages
             const combinedResults = nearbyPlaces.map((place, index) => ({
                 place: place,
                 weather: calculateWeatherAverages(weatherResults[index])
