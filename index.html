@@ -4,17 +4,13 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>WeatherWary.Earth - Recommender</title>
-  
-  <!-- Link to your external CSS file -->
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <!-- LEFT: Search tools -->
   <div class="panel" id="left-panel">
-    <div style="width:80%; max-width:300px;">
-      <img src="logo-cropped.svg" 
-       alt="WeatherWary.Earth Logo" 
-       style="width:360px; height:auto; margin-bottom:0px;" />
+    <!-- This wrapper div constrains the content width -->
+    <div class="content-wrapper">
       <h2>Discover & Plan</h2>
       <label for="citySearch">Search for a City</label>
       <input id="citySearch" type="text" placeholder="e.g., Paris, France" />
@@ -27,7 +23,6 @@
         <option value="museums">Museums</option>
         <option value="castles">Castles</option>
         <option value="national parks">National Parks</option>
-        <option value="Other">Other</option>
       </select>
       <label>Date Range for Weather</label>
       <div class="date-range">
@@ -45,17 +40,14 @@
 
   <!-- RIGHT: Results -->
   <div class="panel" id="right-panel">
-    <div style="width:80%;max-width:400px;display:flex;flex-direction:column;align-items:center;">
+    <!-- This new wrapper div ensures alignment with the left panel -->
+    <div class="content-wrapper">
       <h2>Results</h2>
       <ul id="results-list"></ul>
     </div>
   </div>
 
-  <!-- Link to your external JavaScript file -->
   <script src="script.js"></script>
-
-  <!-- Google Maps API Script -->
-<!-- IMPORTANT: Added the 'geometry' library for distance calculations -->
 <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDkk5aRWm5Yr_X9GhJIjljLgVL9jXlZ_0k&libraries=places,geometry&callback=initMap"></script>
 </body>
 </html>
