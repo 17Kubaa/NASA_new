@@ -27,7 +27,7 @@ body {
 }
 
 .logo {
-  width: 150px;
+  width: 300px;
   height: auto;
   margin: 0 auto 15px auto;
   display: block;
@@ -154,3 +154,4 @@ button:hover {
   #map { width: 100%; height: 100%; border-radius: 0; border: none; }
   #results-list { height: auto; max-height: 50vh; }
 }
+
