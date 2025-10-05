@@ -2,3 +2,5 @@
 new repo for simultaneous work
 
 Website: https://nasa-new-alpha.vercel.app
+
+!!!!! Downloading the file and running it locally won't work!!!!!
