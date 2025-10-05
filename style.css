@@ -50,8 +50,12 @@ body {
     var(--background-darker)
   );
 }
-#right-panel {
-  background-color: var(--background-darker);
+#center-panel {
+  background: radial-gradient(
+    circle at center,
+    var(--background-panel),
+    var(--background-darker)
+  );
 }
 #map {
   width: 130%;
@@ -205,4 +209,5 @@ button:hover {
   width: 100%;
 
 }
+
 
