@@ -1,100 +1,75 @@
 let map, service, geocoder, markers = [];
 let state = { searchCenter: null };
 
+// --- NEW: Map of weather conditions to SVG icon URLs ---
+const weatherIconMap = {
+    sunny: 'https://raw.githubusercontent.com/17Kubaa/NASA_new/main/SVGs/clear-day.svg',
+    cloudy: 'https://raw.githubusercontent.com/17Kubaa/NASA_new/main/SVGs/cloudy.svg',
+    rainy: 'https://raw.githubusercontent.com/17Kubaa/NASA_new/main/SVGs/rain.svg',
+    snowy: 'https://raw.githubusercontent.com/17Kubaa/NASA_new/main/SVGs/snow.svg',
+    default: 'https://raw.githubusercontent.com/17Kubaa/NASA_new/main/SVGs/cloudy.svg' // Fallback icon
+};
+
 function initMap() {
     map = new google.maps.Map(document.getElementById("map"), {
-        zoom: 2,
-        center: { lat: 20, lng: 0 },
-        mapTypeControl: true,
-        streetViewControl: false,
+        zoom: 2, center: { lat: 20, lng: 0 },
+        mapTypeControl: true, streetViewControl: false,
     });
     service = new google.maps.places.PlacesService(map);
-    geocoder = new google.maps.Geocoder(); // Initialize the geocoder
+    geocoder = new google.maps.Geocoder();
 
     const citySearchInput = document.getElementById('citySearch');
     const autocomplete = new google.maps.places.Autocomplete(citySearchInput, { types: ['(cities)'] });
     autocomplete.addListener('place_changed', () => {
         const place = autocomplete.getPlace();
-        if (!place.geometry || !place.geometry.location) {
-            return;
-        }
+        if (!place.geometry || !place.geometry.location) { return; }
         map.setCenter(place.geometry.location);
         map.setZoom(10);
         state.searchCenter = place.geometry.location;
     });
 
     document.getElementById("findPlaces").addEventListener("click", findPlacesAndWeather);
-
-    // Set default values on page load
     setDefaultValues();
 }
 
-// Sets default dates and tries to get user's location
 function setDefaultValues() {
-    // 1. Set Default Date Range
     const fromDateInput = document.getElementById('fromDate');
     const toDateInput = document.getElementById('toDate');
-
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
-
     const twoWeeks = new Date();
     twoWeeks.setDate(tomorrow.getDate() + 14);
-
-    // Helper function to format date as YYYY-MM-DD
     const formatDate = (date) => date.toISOString().split('T')[0];
-
     fromDateInput.value = formatDate(tomorrow);
     toDateInput.value = formatDate(twoWeeks);
 
-
-    // 2. Set Default Location to User's Current Location
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
             (position) => {
-                const userLocation = {
-                    lat: position.coords.latitude,
-                    lng: position.coords.longitude,
-                };
-                
+                const userLocation = { lat: position.coords.latitude, lng: position.coords.longitude };
                 state.searchCenter = new google.maps.LatLng(userLocation.lat, userLocation.lng);
                 map.setCenter(state.searchCenter);
                 map.setZoom(10);
-
-                // Reverse geocode to find the city name and update the search bar
                 geocoder.geocode({ location: userLocation }, (results, status) => {
                     if (status === "OK" && results[0]) {
-                        const addressComponents = results[0].address_components;
-                        const city = addressComponents.find(c => c.types.includes("locality"))?.long_name;
-                        const country = addressComponents.find(c => c.types.includes("country"))?.long_name;
+                        const city = results[0].address_components.find(c => c.types.includes("locality"))?.long_name;
+                        const country = results[0].address_components.find(c => c.types.includes("country"))?.long_name;
                         if (city && country) {
                             document.getElementById('citySearch').value = `${city}, ${country}`;
                         }
-                    } else {
-                        console.warn("Reverse geocode was not successful for the following reason: " + status);
                     }
                 });
             },
-            () => {
-                // User denied location access or an error occurred.
-                console.log("Geolocation access denied. App will wait for manual city search.");
-            }
+            () => { console.log("Geolocation access denied."); }
         );
     }
 }
 
-
 async function findPlacesAndWeather() {
-    if (!state.searchCenter) {
-        alert("Please search for and select a city first.");
-        return;
-    }
+    if (!state.searchCenter) { alert("Please search for and select a city first."); return; }
     const fromDate = document.getElementById('fromDate').value;
     const toDate = document.getElementById('toDate').value;
-    if (!fromDate || !toDate) {
-        alert("Please select a start and end date.");
-        return;
-    }
+    if (!fromDate || !toDate) { alert("Please select a start and end date."); return; }
 
     const activity = document.getElementById("activity").value;
     const resultsList = document.getElementById("results-list");
@@ -103,17 +78,11 @@ async function findPlacesAndWeather() {
     markers = [];
     resultsList.innerHTML = "<li>Searching for places...</li>";
 
-    const request = {
-        location: state.searchCenter,
-        radius: 50000,
-        query: activity,
-        fields: ["name", "geometry"]
-    };
+    const request = { location: state.searchCenter, radius: 50000, query: activity, fields: ["name", "geometry"] };
 
     service.textSearch(request, async (places, status) => {
         if (status !== google.maps.places.PlacesServiceStatus.OK || !places || places.length === 0) {
-            resultsList.innerHTML = "<li>No results found for this activity.</li>";
-            return;
+            resultsList.innerHTML = "<li>No results found for this activity.</li>"; return;
         }
 
         const nearbyPlaces = places.filter(place => {
@@ -122,8 +91,7 @@ async function findPlacesAndWeather() {
         });
 
         if (nearbyPlaces.length === 0) {
-            resultsList.innerHTML = `<li>No results for '${activity}' found within 100km.</li>`;
-            return;
+            resultsList.innerHTML = `<li>No results for '${activity}' found within 100km.</li>`; return;
         }
 
         resultsList.innerHTML = `<li>Found ${nearbyPlaces.length} places. Fetching weather data...</li>`;
@@ -136,44 +104,33 @@ async function findPlacesAndWeather() {
             });
 
             const weatherResults = await Promise.all(weatherPromises);
-
             const combinedResults = nearbyPlaces.map((place, index) => ({
-                place: place,
-                weather: calculateWeatherAverages(weatherResults[index])
+                place: place, weather: calculateWeatherAverages(weatherResults[index])
             }));
-
             const sortedResults = sortResults(combinedResults, activity);
 
             resultsList.innerHTML = "";
             sortedResults.forEach(result => createUnifiedListItemAndMarker(result));
-
-        } catch (error) {
-            resultsList.innerHTML = `<li>Error processing data: ${error.message}</li>`;
-        }
+        } catch (error) { resultsList.innerHTML = `<li>Error processing data: ${error.message}</li>`; }
     });
 }
 
 function sortResults(results, activity) {
     return results.sort((a, b) => {
-        if (a.weather.avgTemp === 'N/A') return 1;
-        if (b.weather.avgTemp === 'N/A') return -1;
-
+        if (a.weather.avgTemp === 'N/A') return 1; if (b.weather.avgTemp === 'N/A') return -1;
         switch (activity) {
-            case 'hiking trails':
-                return a.weather.avgPrecip - b.weather.avgPrecip;
-            case 'beaches':
-                return b.weather.avgTemp - a.weather.avgTemp;
-            case 'ski resorts':
-                return a.weather.avgTemp - b.weather.avgTemp;
-            default:
-                return a.place.distance - b.place.distance;
+            case 'hiking trails': return a.weather.avgPrecip - b.weather.avgPrecip;
+            case 'beaches': return b.weather.avgTemp - a.weather.avgTemp;
+            case 'ski resorts': return a.weather.avgTemp - b.weather.avgTemp;
+            default: return a.place.distance - b.place.distance;
         }
     });
 }
 
+// --- UPDATED: This function now also returns a weather condition string ---
 function calculateWeatherAverages(weatherData) {
     if (!weatherData || !weatherData.data || weatherData.status !== "OK") {
-        return { avgTemp: 'N/A', avgPrecip: 'N/A' };
+        return { avgTemp: 'N/A', avgPrecip: 'N/A', condition: 'default' };
     }
     let tempSum = 0, precipSum = 0, tempCount = 0, precipCount = 0;
     const tempParam = weatherData.data.find(p => p.parameter === 't_2m:C');
@@ -184,30 +141,44 @@ function calculateWeatherAverages(weatherData) {
     if (precipParam) {
         precipParam.coordinates[0].dates.forEach(v => { precipSum += v.value; precipCount++; });
     }
+    const avgTemp = tempCount > 0 ? (tempSum / tempCount) : 'N/A';
+    const avgPrecip = precipCount > 0 ? (precipSum / precipCount) : 'N/A';
+
+    // Determine the overall weather condition
+    let condition = 'cloudy';
+    if (avgPrecip > 0.5) {
+        condition = 'rainy';
+    } else if (avgTemp < 2) {
+        condition = 'snowy';
+    } else if (avgPrecip < 0.1 && avgTemp > 20) {
+        condition = 'sunny';
+    }
+
     return {
-        avgTemp: tempCount > 0 ? (tempSum / tempCount).toFixed(1) : 'N/A',
-        avgPrecip: precipCount > 0 ? (precipSum / precipCount).toFixed(2) : 'N/A'
+        avgTemp: avgTemp !== 'N/A' ? avgTemp.toFixed(1) : 'N/A',
+        avgPrecip: avgPrecip !== 'N/A' ? avgPrecip.toFixed(2) : 'N/A',
+        condition: condition
     };
 }
 
+// --- UPDATED: This function now adds the weather icon ---
 function createUnifiedListItemAndMarker(result) {
     const place = result.place;
     const weather = result.weather;
 
-    const marker = new google.maps.Marker({
-        position: place.geometry.location,
-        map,
-        title: place.name
-    });
+    const marker = new google.maps.Marker({ position: place.geometry.location, map, title: place.name });
     markers.push(marker);
 
     const li = document.createElement("li");
     li.className = 'result-item';
     const distanceInKm = (place.distance / 1000).toFixed(1);
     
-    // This is the updated HTML structure for each list item
+    // Select the correct icon URL based on the weather condition
+    const iconSrc = weatherIconMap[weather.condition] || weatherIconMap.default;
+
     li.innerHTML = `
-      <div>
+      <img src="${iconSrc}" alt="${weather.condition}" class="weather-icon">
+      <div class="result-content">
         <div class="result-header">
           <span class="place-name">${place.name}</span>
           <span class="place-distance">${distanceInKm} km away</span>
@@ -227,10 +198,7 @@ function createUnifiedListItemAndMarker(result) {
     
     document.getElementById("results-list").appendChild(li);
 
-    const clickHandler = () => {
-        map.panTo(place.geometry.location);
-        map.setZoom(14);
-    };
+    const clickHandler = () => { map.panTo(place.geometry.location); map.setZoom(14); };
     li.addEventListener('click', clickHandler);
     marker.addListener('click', clickHandler);
 }
