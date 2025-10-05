@@ -103,9 +103,13 @@ async function findPlacesAndWeather() {
             });
 
             const weatherResults = await Promise.all(weatherPromises);
+            
+            // --- UPDATED: Call the new analysis function ---
             const combinedResults = nearbyPlaces.map((place, index) => ({
-                place: place, weather: calculateWeatherAverages(weatherResults[index])
+                place: place,
+                weather: analyzeWeatherData(weatherResults[index], activity)
             }));
+            
             const sortedResults = sortResults(combinedResults, activity);
 
             resultsList.innerHTML = "";
@@ -126,19 +130,20 @@ function sortResults(results, activity) {
     });
 }
 
-function calculateWeatherAverages(weatherData) {
+// --- UPDATED: This function is now much more powerful ---
+function analyzeWeatherData(weatherData, activity) {
     if (!weatherData || !weatherData.data || weatherData.status !== "OK") {
-        return { avgTemp: 'N/A', avgPrecip: 'N/A', condition: 'default' };
+        return { avgTemp: 'N/A', avgPrecip: 'N/A', condition: 'default', bestDay: null };
     }
+    
+    // 1. Calculate Averages (for sorting and overall icon)
     let tempSum = 0, precipSum = 0, tempCount = 0, precipCount = 0;
     const tempParam = weatherData.data.find(p => p.parameter === 't_2m:C');
-    if (tempParam) {
-        tempParam.coordinates[0].dates.forEach(v => { tempSum += v.value; tempCount++; });
-    }
     const precipParam = weatherData.data.find(p => p.parameter === 'precip_1h:mm');
-    if (precipParam) {
-        precipParam.coordinates[0].dates.forEach(v => { precipSum += v.value; precipCount++; });
-    }
+
+    if (tempParam) { tempParam.coordinates[0].dates.forEach(v => { tempSum += v.value; tempCount++; }); }
+    if (precipParam) { precipParam.coordinates[0].dates.forEach(v => { precipSum += v.value; precipCount++; }); }
+
     const avgTemp = tempCount > 0 ? (tempSum / tempCount) : 'N/A';
     const avgPrecip = precipCount > 0 ? (precipSum / precipCount) : 'N/A';
 
@@ -147,14 +152,37 @@ function calculateWeatherAverages(weatherData) {
     else if (avgTemp < 2) { condition = 'snowy'; }
     else if (avgPrecip < 0.1 && avgTemp > 15) { condition = 'sunny'; }
 
+    // 2. Find the Best Day based on the activity
+    let bestDay = null;
+    const allDates = tempParam?.coordinates[0]?.dates || precipParam?.coordinates[0]?.dates;
+
+    if (allDates) {
+        switch (activity) {
+            case 'beaches': // Hottest day
+                bestDay = tempParam.coordinates[0].dates.reduce((max, current) => current.value > max.value ? current : max, allDates[0]);
+                break;
+            case 'hiking trails': // Driest day
+                bestDay = precipParam.coordinates[0].dates.reduce((min, current) => current.value < min.value ? current : min, allDates[0]);
+                break;
+            case 'ski resorts': // Coldest day
+                bestDay = tempParam.coordinates[0].dates.reduce((min, current) => current.value < min.value ? current : min, allDates[0]);
+                break;
+            default: // For distance-based, just use the first day
+                bestDay = allDates[0];
+                break;
+        }
+    }
+
     return {
         avgTemp: avgTemp !== 'N/A' ? avgTemp.toFixed(1) : 'N/A',
         avgPrecip: avgPrecip !== 'N/A' ? avgPrecip.toFixed(2) : 'N/A',
-        condition: condition
+        condition: condition,
+        bestDay: bestDay // This object contains { date: "...", value: ... }
     };
 }
 
-// --- UPDATED: This function now adds the date and day of the week ---
+
+// --- UPDATED: This function now displays the best day ---
 function createUnifiedListItemAndMarker(result) {
     const place = result.place;
     const weather = result.weather;
@@ -167,12 +195,14 @@ function createUnifiedListItemAndMarker(result) {
     const distanceInKm = (place.distance / 1000).toFixed(1);
     const iconSrc = weatherIconMap[weather.condition] || weatherIconMap.default;
 
-    // --- NEW: Get and format the start date ---
-    const fromDateValue = document.getElementById('fromDate').value;
-    // Create date object correctly to avoid timezone issues
-    const startDate = new Date(fromDateValue + 'T00:00:00');
-    const dayOfWeek = startDate.toLocaleDateString('en-US', { weekday: 'long' });
-    const formattedDate = startDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+    // --- NEW: Format the "best day" date, or show nothing if it's not available ---
+    let dateDisplayHtml = '';
+    if (weather.bestDay && weather.bestDay.date) {
+        const bestDate = new Date(weather.bestDay.date);
+        const dayOfWeek = bestDate.toLocaleDateString('en-US', { weekday: 'long' });
+        const formattedDate = bestDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+        dateDisplayHtml = `<div class="event-date">Best Day: ${dayOfWeek}, ${formattedDate}</div>`;
+    }
 
     li.innerHTML = `
       <img src="${iconSrc}" alt="${weather.condition}" class="weather-icon">
@@ -191,9 +221,7 @@ function createUnifiedListItemAndMarker(result) {
             <span>Avg. Precip</span>
           </div>
         </div>
-        <div class="event-date">
-          ${dayOfWeek}, ${formattedDate}
-        </div>
+        ${dateDisplayHtml}
       </div>
     `;
     
