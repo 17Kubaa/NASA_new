@@ -1,8 +1,6 @@
 /* --- COLOR PALETTE --- */
 :root {
-  --background-darker: #0b1220;
-  --background-dark: #0f1724;
-  --background-panel: #152338;
+  --background: #0f1724; /* unified background for all panels */
   --text-primary: #e6eef6;
   --text-secondary: #9aa6b2;
   --accent-primary: #46b3ff;
@@ -22,7 +20,7 @@ body {
   font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   height: 100vh;
   display: flex;
-  background-color: var(--background-dark);
+  background-color: var(--background);
   color: var(--text-primary);
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
@@ -34,11 +32,12 @@ body {
   height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start; /* allow content from top */
+  justify-content: flex-start;
   align-items: center;
   padding: 30px;
   transition: all 0.3s ease-in-out;
-  background-color: var(--background-darker); /* full panel background */
+  background-color: var(--background); /* unified background */
+  border: none; /* no panel borders */
 }
 
 /* --- LAYOUT PROPORTIONS --- */
@@ -46,14 +45,12 @@ body {
   flex: 1;
   min-width: 350px;
   max-width: 400px;
-  background-color: var(--background-darker);
+  background-color: var(--background);
 }
-#left-panel { border-right: 1px solid var(--border-color); }
-#right-panel { border-left: 1px solid var(--border-color); }
 
 #center-panel {
-  flex: 2; /* slightly smaller to fit side panels */
-  background: radial-gradient(circle at center, var(--background-panel), var(--background-dark));
+  flex: 2; /* slightly smaller to allow side panels */
+  background-color: var(--background);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -62,7 +59,7 @@ body {
 /* --- CONTENT WRAPPER --- */
 .content-wrapper {
   width: 100%;
-  max-width: 400px; /* wider for larger results */
+  max-width: 420px; /* wider for results */
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -71,7 +68,7 @@ body {
 
 /* --- MAP --- */
 #map {
-  width: 90%; /* smaller map to give more room */
+  width: 90%;
   height: 70%;
   border-radius: 20px;
   overflow: hidden;
@@ -85,12 +82,13 @@ h2 {
   color: var(--accent-primary);
   margin-bottom: 20px;
   font-weight: 600;
+  font-size: 1.3em;
   text-align: center;
 }
 
 label {
   display: block;
-  margin-top: 15px;
+  margin-top: 12px;
   color: var(--text-secondary);
   font-size: 14px;
   font-weight: 500;
@@ -100,7 +98,7 @@ label {
 input[type="date"], input[type="text"], select {
   width: 100%;
   padding: 10px;
-  margin-top: 8px;
+  margin-top: 6px;
   border-radius: 6px;
   border: 1px solid transparent;
   background: rgba(255, 255, 255, 0.07);
@@ -109,7 +107,7 @@ input[type="date"], input[type="text"], select {
   transition: all 0.2s ease-in-out;
 }
 
-select option { background: var(--background-darker); }
+select option { background: var(--background); }
 
 input[type="date"]:hover, input[type="text"]:hover, select:hover { border-color: var(--border-color); }
 input[type="date"]:focus, input[type="text"]:focus, select:focus {
@@ -120,12 +118,12 @@ input[type="date"]:focus, input[type="text"]:focus, select:focus {
 
 /* --- BUTTON --- */
 button {
-  margin-top: 25px;
+  margin-top: 20px;
   padding: 12px 14px;
   border-radius: 8px;
   background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
-  color: #0b1220;
-  font-weight: bold;
+  color: var(--background);
+  font-weight: 600;
   font-size: 15px;
   border: none;
   cursor: pointer;
@@ -155,7 +153,7 @@ button:hover {
 
 /* --- RESULT ITEMS --- */
 .result-item {
-  padding: 18px 20px;
+  padding: 18px 22px;
   border-radius: 12px;
   margin-bottom: 14px;
   cursor: pointer;
@@ -163,31 +161,30 @@ button:hover {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border: 1px solid transparent;
   transition: all 0.2s ease-in-out;
   animation: fadeIn 0.5s ease-out forwards;
-  width: 100%; /* take full content width */
+  width: 100%;
   font-size: 15px;
+  line-height: 1.4;
 }
 
 .result-item:hover {
   background: rgba(70, 179, 255, 0.1);
-  border-color: var(--accent-primary);
-  transform: scale(1.03);
+  transform: scale(1.02);
 }
 
 /* --- LEFT ICON / RATING --- */
 .result-item .left-rating {
   font-weight: 600;
   color: var(--accent-secondary);
-  margin-right: 12px;
+  margin-right: 14px;
   flex-shrink: 0;
 }
 
 /* --- PLACE INFO --- */
 .place-info {
   flex-grow: 1;
-  text-align: center;
+  text-align: left;
 }
 .place-name {
   font-weight: 600;
@@ -204,7 +201,7 @@ button:hover {
 .result-item .right-data {
   font-size: 14px;
   color: var(--accent-primary);
-  margin-left: 12px;
+  margin-left: 14px;
   flex-shrink: 0;
   text-align: right;
 }
@@ -214,7 +211,6 @@ button:hover {
   display: flex;
   align-items: center;
   gap: 10px;
-  text-align: right;
   white-space: nowrap;
   font-weight: 500;
   font-size: 1.1em;
