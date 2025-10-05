@@ -45,27 +45,41 @@ async function findPlacesAndWeather() {
 
     const request = {
         location: state.searchCenter,
-        radius: 50000,
+        radius: 50000, // This radius helps Google find initial candidates
         query: activity,
         fields: ["name", "geometry"]
     };
 
     service.textSearch(request, async (places, status) => {
         if (status !== google.maps.places.PlacesServiceStatus.OK || !places || places.length === 0) {
-            resultsList.innerHTML = "<li>No results found.</li>";
+            resultsList.innerHTML = "<li>No results found for this activity.</li>";
             return;
         }
 
-        resultsList.innerHTML = `<li>Found ${places.length} places. Fetching weather data...</li>`;
+        // --- START: MODIFIED LOGIC ---
+
+        // Step 1: Augment places with exact distance information
+        places.forEach(place => {
+            place.distance = google.maps.geometry.spherical.computeDistanceBetween(state.searchCenter, place.geometry.location);
+        });
+        
+        // Step 2: Filter the results to only include places within 100km (100,000 meters)
+        const nearbyPlaces = places.filter(place => place.distance <= 100000);
+
+        // Step 3: Check if any places remain after filtering.
+        if (nearbyPlaces.length === 0) {
+            resultsList.innerHTML = `<li>No results for '${activity}' found within 100km.</li>`;
+            return; // Stop execution here
+        }
+        
+        // --- END: MODIFIED LOGIC ---
+
+
+        resultsList.innerHTML = `<li>Found ${nearbyPlaces.length} places. Fetching weather data...</li>`;
 
         try {
-            // Step 1: Augment places with distance information
-            places.forEach(place => {
-                place.distance = google.maps.geometry.spherical.computeDistanceBetween(state.searchCenter, place.geometry.location);
-            });
-
-            // Step 2: Fetch weather for all places concurrently
-            const weatherPromises = places.map(place => {
+            // Fetch weather ONLY for the nearby places
+            const weatherPromises = nearbyPlaces.map(place => {
                 const loc = place.geometry.location;
                 const url = `/api/getWeather?lat=${loc.lat()}&lng=${loc.lng()}&startISO=${new Date(fromDate).toISOString().slice(0,10)}T00:00:00Z&endISO=${new Date(toDate).toISOString().slice(0,10)}T23:59:00Z&parameters=t_2m:C,precip_1h:mm`;
                 return fetch(url).then(res => res.json());
@@ -73,16 +87,14 @@ async function findPlacesAndWeather() {
 
             const weatherResults = await Promise.all(weatherPromises);
 
-            // Step 3: Combine places, weather, and averages into a single array
-            const combinedResults = places.map((place, index) => ({
+            // Combine the nearby places, weather, and averages
+            const combinedResults = nearbyPlaces.map((place, index) => ({
                 place: place,
                 weather: calculateWeatherAverages(weatherResults[index])
             }));
 
-            // Step 4: Sort the combined array based on the selected activity
             const sortedResults = sortResults(combinedResults, activity);
 
-            // Step 5: Render the final sorted list
             resultsList.innerHTML = "";
             sortedResults.forEach(result => createUnifiedListItemAndMarker(result));
 
@@ -94,23 +106,18 @@ async function findPlacesAndWeather() {
 
 function sortResults(results, activity) {
     return results.sort((a, b) => {
-        // Handle cases where weather data is not available
         if (a.weather.avgTemp === 'N/A') return 1;
         if (b.weather.avgTemp === 'N/A') return -1;
 
         switch (activity) {
             case 'hiking trails':
-                return a.weather.avgPrecip - b.weather.avgPrecip; // Lowest precipitation
+                return a.weather.avgPrecip - b.weather.avgPrecip;
             case 'beaches':
-                return b.weather.avgTemp - a.weather.avgTemp; // Highest temperature
+                return b.weather.avgTemp - a.weather.avgTemp;
             case 'ski resorts':
-                return a.weather.avgTemp - b.weather.avgTemp; // Lowest temperature
-            case 'fishing spots':
-            case 'museums':
-            case 'castles':
-            case 'national parks':
+                return a.weather.avgTemp - b.weather.avgTemp;
             default:
-                return a.place.distance - b.place.distance; // Closest distance
+                return a.place.distance - b.place.distance;
         }
     });
 }
