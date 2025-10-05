@@ -37,7 +37,6 @@ body {
   padding: 30px;
   transition: all 0.3s ease-in-out;
   background-color: var(--background); /* unified background */
-  border: none; /* no panel borders */
 }
 
 /* --- LAYOUT PROPORTIONS --- */
@@ -206,34 +205,38 @@ button:hover {
   text-align: right;
 }
 
-/* --- WEATHER INFO --- */
+/* --- WEATHER INFO (STACKED ICONS) --- */
 .weather-info {
   display: flex;
+  gap: 12px;
+}
+
+.weather-info .weather-item {
+  display: flex;
+  flex-direction: column; /* stack icon over value */
   align-items: center;
-  gap: 10px;
-  white-space: nowrap;
-  font-weight: 500;
-  font-size: 1.1em;
+  font-size: 0.9em;
   color: var(--text-primary);
 }
 
-.weather-info span {
-  display: block;
-  font-size: 0.75em;
-  color: var(--text-secondary);
-  font-weight: 400;
-}
-
-.weather-info img, .weather-info svg {
+.weather-info .weather-item img,
+.weather-info .weather-item svg {
   width: 36px;
   height: 36px;
+  margin-bottom: 2px;
   flex-shrink: 0;
   transition: transform 0.2s ease-in-out;
 }
 
-.result-item:hover .weather-info img,
-.result-item:hover .weather-info svg {
+.result-item:hover .weather-info .weather-item img,
+.result-item:hover .weather-info .weather-item svg {
   transform: scale(1.15);
+}
+
+.weather-info .weather-label {
+  font-size: 0.75em;
+  color: var(--text-secondary);
+  font-weight: 400;
 }
 
 /* --- DATE RANGE --- */
