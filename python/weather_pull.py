@@ -1,9 +1,10 @@
 import meteomatics.api as api
-import datetime as dt
+from datetime import datetime, timedelta
 import pandas as pd
 import numpy as np
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from weather_pred_simple import calc_avg_weather
 
 # ==============================
 # Replace with your demo credentials
@@ -34,13 +35,13 @@ if False:
     parameters = activity_dict[activity]
 else:
     parameters = [
-        "t_min_2m_24h:C",      # daily min temperature
-        "t_max_2m_24h:C",      # daily max temperature
+        # "t_min_2m_24h:C",      # daily min temperature
+        # "t_max_2m_24h:C",      # daily max temperature
         "t_mean_2m_24h:C",     # daily mean temperature
         "precip_24h:mm",       # daily precipitation sum
-        "wind_speed_10m:ms",   # mean wind speed
+        # "wind_speed_10m:ms",   # mean wind speed
         # "wind_gusts_10m_24h:ms", # max gusts
-        "sunshine_duration_24h:min"  # daily sunshine duration
+        # "sunshine_duration_24h:min"  # daily sunshine duration
     ]
 
 
@@ -50,46 +51,37 @@ lon_min, lon_max = -10.5, -5.5
 resolution = 0.1 # degrees
 coordinates = [(51.5,-10.5)] 
 
-start_month = 3
-start_day = 1
-end_month = 3
-end_day = 31
+def get_weather_data(coordinates=coordinates, start_month=datetime.today().month, start_day=datetime.today().day, end_month=(datetime.today() + timedelta(days=14)).month, end_day=(datetime.today() + timedelta(days=14)).day):
+    years = range(2015, 2025)
+    all_dfs = []
 
-years = range(2015, 2025)
-all_dfs = []
+    for year in years:
+        startdate = datetime(year, start_month, start_day, 0, 0)
+        enddate   = datetime(year, end_month, end_day, 0, 0)
+        interval  = timedelta(days=1)
+        
+        df = api.query_time_series(
+            coordinates,
+            startdate,
+            enddate,
+            interval,
+            parameters,
+            username=USERNAME,
+            password=PASSWORD,
+            model="mix"
+        )
 
-for year in years:
-    startdate = dt.datetime(year, start_month, start_day, 0, 0)
-    enddate   = dt.datetime(year, end_month, end_day, 0, 0)
-    interval  = dt.timedelta(days=1)
-    
-    df = api.query_time_series(
-        coordinates,
-        startdate,
-        enddate,
-        interval,
-        parameters,
-        username=USERNAME,
-        password=PASSWORD,
-        model="mix"
-    )
+        # move datetime index into a column
+        df = df.reset_index()
 
-    # move datetime index into a column
-    df = df.reset_index()
-
-    df["validdate"] = pd.to_datetime(df["validdate"])
-    df["year"] = df["validdate"].dt.year
-    df["month"] = df["validdate"].dt.month
-    df["day"] = df["validdate"].dt.day
-    df.drop(columns="validdate", inplace=True)
-    all_dfs.append(df)
-
-final_df = pd.concat(all_dfs, ignore_index=True)
-print("Combined DataFrame created successfully!")
-print(final_df.head())
-print(final_df.info())
-print("Data fetching successful.")
-final_df.head(5)
+        df["validdate"] = pd.to_datetime(df["validdate"])
+        df["year"] = df["validdate"].dt.year
+        df["month"] = df["validdate"].dt.month
+        df["day"] = df["validdate"].dt.day
+        df.drop(columns="validdate", inplace=True)
+        all_dfs.append(df)
+    final_df = pd.concat(all_dfs, ignore_index=True)
+    pred_df = calc_avg_weather(final_df)
 
 # Save as JSON
 # json_filename = "ireland_weather_daily.json"
