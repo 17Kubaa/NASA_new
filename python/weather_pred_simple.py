@@ -1,6 +1,5 @@
 # based on a dataframe or csv spits back out a csv that for each day for each value it returns the average of the past 10 years values
 import pandas as pd
-from weather_pull import final_df
 
 def calc_avg_weather(input_df):
     """
@@ -34,5 +33,3 @@ def calc_avg_weather(input_df):
     average_df.index.name = 'Month-Day'
 
     return average_df
-
-print(calc_avg_weather(final_df))
