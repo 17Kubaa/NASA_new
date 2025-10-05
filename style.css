@@ -28,7 +28,7 @@ body {
 
 /* --- MODIFIED: LOGO STYLING --- */
 .logo {
-  width: 150px; /* Increased from 120px */
+  width: 300px; /* Increased from 120px */
   height: auto;
   margin: 0 auto 15px auto; /* Increased bottom margin */
   display: block;
@@ -145,3 +145,4 @@ button:hover {
   #map { width: 100%; height: 100%; border-radius: 0; border: none; }
   #results-list { height: auto; max-height: 50vh; }
 }
+
