@@ -1,4 +1,4 @@
-/* Define a modern color palette and consistent properties */
+/* --- COLOR PALETTE --- */
 :root {
   --background-darker: #0b1220;
   --background-dark: #0f1724;
@@ -12,7 +12,7 @@
   --interactive-glow: rgba(70, 179, 255, 0.3);
 }
 
-/* Add a smooth font and box-sizing reset */
+/* --- RESET & BASE --- */
 * {
   box-sizing: border-box;
 }
@@ -29,21 +29,21 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* --- LAYOUT PANELS --- */
+/* --- PANELS --- */
 .panel {
   height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   padding: 30px;
   transition: all 0.3s ease-in-out;
 }
 
-/* --- NEW: Layout Proportions --- */
+/* --- LAYOUT PROPORTIONS --- */
 #left-panel, #right-panel {
-  flex: 1; /* Side panels take 1 part of the space */
-  min-width: 350px; /* Prevent them from getting too squished */
+  flex: 1;
+  min-width: 350px;
   max-width: 400px;
   background-color: var(--background-darker);
 }
@@ -51,21 +51,38 @@ body {
 #right-panel { border-left: 1px solid var(--border-color); }
 
 #center-panel {
-  flex: 2.5; /* Center panel takes 2.5 parts, making it much larger */
+  flex: 2.5;
   background: radial-gradient(circle at center, var(--background-panel), var(--background-dark));
 }
 
-/* --- NEW: Wrapper for consistent content alignment --- */
+/* --- LEFT PANEL LOGO & SEARCH WRAPPER --- */
+.left-top {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 25px;
+}
+
+.left-top img.logo {
+  max-width: 80%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+/* --- CONTENT WRAPPER --- */
 .content-wrapper {
   width: 80%;
   max-width: 320px;
   height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
+  align-items: center;
 }
 
-/* --- NEW: Map now fits its container perfectly --- */
+/* --- MAP --- */
 #map {
   width: 100%;
   height: 85%;
@@ -73,16 +90,10 @@ body {
   overflow: hidden;
   box-shadow: 0 0 30px var(--shadow-color);
   border: 1px solid var(--border-color);
+  margin: 0 auto;
 }
-
 
 /* --- UI ELEMENTS --- */
-h2 {
-  color: var(--accent-primary);
-  margin-bottom: 20px;
-  font-weight: 600;
-  text-align: center;
-}
 label {
   display: block;
   margin-top: 15px;
@@ -130,9 +141,11 @@ button:hover {
 
 /* --- RESULTS LIST & SCROLLBAR HIDING --- */
 #results-list {
-  list-style: none; padding: 0; margin: 0;
-  width: 100%; /* Take full width of its wrapper */
-  height: calc(100% - 70px); /* Fill available height below the H2 */
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  height: calc(100% - 70px);
   overflow-y: auto;
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -145,9 +158,14 @@ button:hover {
 }
 
 .result-item {
-  padding: 12px; border-radius: 8px; margin-bottom: 8px; cursor: pointer;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  cursor: pointer;
   background: rgba(255, 255, 255, 0.05);
-  display: flex; justify-content: space-between; align-items: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   border: 1px solid transparent;
   transition: all 0.2s ease-in-out;
   animation: fadeIn 0.5s ease-out forwards;
@@ -157,9 +175,42 @@ button:hover {
   border-color: var(--accent-primary);
   transform: scale(1.02);
 }
+
 .place-info { flex-grow: 1; }
 .place-name { font-weight: 600; color: var(--text-primary); }
 .place-distance { font-size: 0.8em; color: var(--text-secondary); margin-top: 2px; }
-.weather-info { text-align: right; white-space: nowrap; margin-left: 15px; font-weight: 500; font-size: 1.1em; color: var(--text-primary); }
-.weather-info span { display: block; font-size: 0.75em; color: var(--text-secondary); font-weight: 400; }
+
+.weather-info { 
+  display: flex;
+  gap: 10px;
+  margin-left: 15px;
+  white-space: nowrap;
+}
+
+.weather-info .weather-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.weather-info img, .weather-info svg {
+  width: 36px;
+  height: 36px;
+  margin-bottom: 2px;
+  transition: transform 0.2s ease-in-out;
+}
+
+.weather-info span {
+  display: block;
+  font-size: 0.75em;
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+.result-item:hover .weather-info img,
+.result-item:hover .weather-info svg {
+  transform: scale(1.15);
+}
+
 .date-range { display: flex; gap: 8px; width: 100%; }
+
